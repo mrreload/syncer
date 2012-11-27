@@ -4,6 +4,7 @@
  */
 package syncer;
 
+import java.io.File;
 import java.util.logging.Logger;
 
 /**
@@ -81,8 +82,20 @@ public class MsgParser {
             }
             if (szMSG[2].equals("XLST")) {
                 System.out.println("Received a XLST " + szMSG[0]);
+                String fileREQ = "Receiving: ";
                 for (int i = 0; i < szMSG.length; i++) {
-//            System.out.println(szMSG[i]);
+                    fileREQ = fileREQ + " " + szMSG[i];
+                }
+                msgLOG.info(fileREQ);
+                Receiver.rcvFile2(szMSG, UID);
+            }
+            if (szMSG[2].equals("REQXLST")) {
+                System.out.println("Client requested xbmc list " + szMSG[0]);
+                try {
+xbmcHandler.query();
+Sender.putQ(szMSG[0], "XLST,," + Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".csv" + ",,0");
+                } catch (Exception ex) {
+                    ex.printStackTrace();
                 }
             }
 

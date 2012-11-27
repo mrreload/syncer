@@ -161,6 +161,11 @@ public class Config {
         dSet("local.port", "13267");
         dSet("local.name", "dummy");
         dSet("My.Uid", "");
+        dSet("xbmc-db.user", "xbmc");
+        dSet("xbmc-db.pass", "xbmc");
+        dSet("xbmc-db.host", "localhost");
+        dSet("xbmc-db.port", "3306");
+        dSet("xbmc-db.name", "MyVideos72");
         dSet("log.level", "4");
         
     }

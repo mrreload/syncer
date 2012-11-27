@@ -19,7 +19,8 @@ public class Sender {
     static boolean RemoteCanReceive;
     final static String sep = ",,";
     static BlockingQueue<String> Q;// = new PriorityBlockingQueue<>();
-public final static Logger sndLOG = Logger.getLogger(Sender.class.getName());
+    public final static Logger sndLOG = Logger.getLogger(Sender.class.getName());
+
     Sender() {
         Q = new PriorityBlockingQueue<>();
     }
@@ -159,6 +160,9 @@ public final static Logger sndLOG = Logger.getLogger(Sender.class.getName());
 
     private static void processQ(String szQ) {
         String[] szQmsg = szQ.split(",,");
+        for (int i = 0; i < szQmsg.length; i++) {
+            System.out.println(szQmsg[i]);
+                }
         //test for valid socket connection
         if (ConnectionHandler.sockets.get(szQmsg[1]).isConnected()) {
             if (szQmsg[2].equals("FIL")) {

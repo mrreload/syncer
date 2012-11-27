@@ -30,9 +30,6 @@ public class Syncer {
             szFile = args[1];
             
         }
-        xbmcHandler.query();
-        System.exit(22);
-
         Config.setHome();
         Config.checkDefaults();
         LogMan.setup();
@@ -53,6 +50,7 @@ public class Syncer {
             Node.connect(Config.readProp("remote.host", Config.cfgFile), Integer.parseInt(Config.readProp("remote.port", Config.cfgFile)));
 
             TimeUnit.SECONDS.sleep(1);
+            Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
 //            Sender.putQ(Config.readProp("dummy", Config.cfgFile), "ACK,," + Config.readProp("local.name", Config.cfgFile));
 
 

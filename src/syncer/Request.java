@@ -57,13 +57,15 @@ public class Request {
         //logic to find and send a single chunk
     }
 
-    
-
     class MyReverseComparator implements Comparator {
 
         public int compare(Object x, Object y) {
             return ((Comparable) y).compareTo(x);
         }
     }
+    static void reqXlist(String[] szFile, String UID) {
+        //logic to find and send a single chunk
+    }
+
 
 }
