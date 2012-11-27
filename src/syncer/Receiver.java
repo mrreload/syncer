@@ -151,4 +151,63 @@ public class Receiver {
                 }).start();
             }
         }
+    public static void rcvXLST(String[] szFileInfo, String UID) {
+
+        System.out.println(szFileInfo.length);
+        int bytesRead;
+
+        boolean blReceive = true;
+        if (alFiles == null) {
+            alFiles = new ArrayList<>();
+        }
+        if (badFiles == null) {
+            badFiles = new ArrayList<>();
+        }
+        while (blReceive) {
+//            InputStream in = null;
+            try {
+                DataInputStream clientData = new DataInputStream(ConnectionHandler.inStreams.get(UID));
+                String fileName = szFileInfo[2];
+                String szSHA = szFileInfo[3];
+                int index = Integer.parseInt(szFileInfo[4]);
+//                iCurrentChunk = index + 1;
+//                iTotalChunk = Integer.parseInt(szFileInfo[5]);
+//                szSHAFull = szFileInfo[6];
+//                szOrgFileName = szFileInfo[7];
+                String szFileOutPath = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull;
+                if (!new File(szFileOutPath).exists()) {
+                    new File(szFileOutPath).mkdirs();
+                }
+                String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
+                OutputStream output = new FileOutputStream(szCurrentChunk);
+                long size = clientData.readLong();
+                System.out.println("Receiving: " + szCurrentChunk + " Size: " + size );
+                byte[] buffer = new byte[1024];
+                while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
+                    output.write(buffer, 0, bytesRead);
+                    size -= bytesRead;
+                }
+
+                output.flush();
+                output.close();
+                // Add file to received collection, must check for matching source file
+//                if (Receiver.verifyHash(szSHA, Hasher.getSHA(szCurrentChunk))) {
+//
+//                    alFiles.add(index, new File(szCurrentChunk));
+//
+//                } else {
+//                    //add logic to re-send corrupt chunk
+//                    System.out.println("Chunk is BAD!");
+//                    badFiles.ensureCapacity(index);
+//                    badFiles.add(szFileInfo);
+//
+//                }
+//                checkAndAssemble(UID);
+                blReceive = false;
+            } catch (IOException ex) {
+                rcvLOG.severe(ex.getMessage());
+            }
+        }
+//        checkAndAssemble(UID);
+    }
     }
