@@ -49,8 +49,8 @@ public class Syncer {
             mainLOG.info("Starting Node");
             Node.connect(Config.readProp("remote.host", Config.cfgFile), Integer.parseInt(Config.readProp("remote.port", Config.cfgFile)));
 
-            TimeUnit.SECONDS.sleep(1);
-            Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
+//            TimeUnit.SECONDS.sleep(3);
+//            Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
 //            Sender.putQ(Config.readProp("dummy", Config.cfgFile), "ACK,," + Config.readProp("local.name", Config.cfgFile));
 
 

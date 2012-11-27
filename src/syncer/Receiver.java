@@ -153,7 +153,7 @@ public class Receiver {
         }
     public static void rcvXLST(String[] szFileInfo, String UID) {
 
-        System.out.println(szFileInfo.length);
+        System.out.println("Receiving XLST length: " + szFileInfo.length);
         int bytesRead;
 
         boolean blReceive = true;
@@ -167,21 +167,21 @@ public class Receiver {
 //            InputStream in = null;
             try {
                 DataInputStream clientData = new DataInputStream(ConnectionHandler.inStreams.get(UID));
-                String fileName = szFileInfo[2];
-                String szSHA = szFileInfo[3];
-                int index = Integer.parseInt(szFileInfo[4]);
+                String fileName = szFileInfo[3];
+                String szSHA = szFileInfo[4];
+//                int index = Integer.parseInt(szFileInfo[4]);
 //                iCurrentChunk = index + 1;
 //                iTotalChunk = Integer.parseInt(szFileInfo[5]);
 //                szSHAFull = szFileInfo[6];
 //                szOrgFileName = szFileInfo[7];
-                String szFileOutPath = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull;
+                String szFileOutPath = Config.readProp("receive.tmp", Config.cfgFile);
                 if (!new File(szFileOutPath).exists()) {
                     new File(szFileOutPath).mkdirs();
                 }
                 String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
                 OutputStream output = new FileOutputStream(szCurrentChunk);
                 long size = clientData.readLong();
-                System.out.println("Receiving: " + szCurrentChunk + " Size: " + size );
+                System.out.println("Receiving: " + szCurrentChunk + " Size: " + size + " SHA256: " + szSHA);
                 byte[] buffer = new byte[1024];
                 while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
                     output.write(buffer, 0, bytesRead);
@@ -203,6 +203,7 @@ public class Receiver {
 //
 //                }
 //                checkAndAssemble(UID);
+                System.out.println("Done receiving XBMC db export from: " + szFileInfo[1]);
                 blReceive = false;
             } catch (IOException ex) {
                 rcvLOG.severe(ex.getMessage());

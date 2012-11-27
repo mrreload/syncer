@@ -22,7 +22,10 @@ import java.util.logging.Logger;
  */
 public class xbmcHandler {
 
-    public static void query() {
+    public static void query(String szExport) {
+        if (new File(szExport).exists()) {
+            new File(szExport).delete();
+        }
 
         Connection con = null;
         PreparedStatement pst = null;
@@ -42,7 +45,7 @@ public class xbmcHandler {
 
             while (rs.next()) {
 
-                csvWrite(rs.getInt("idFile") + "," + rs.getString("Title").replaceAll(",", "") + "," + rs.getString("Year") + "," + rs.getString("imdb_id") + "," + rs.getString("fullpath"), Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".csv");
+                csvWrite(rs.getInt("idFile") + "\t" + rs.getString("Title") + "\t" + rs.getString("Year") + "\t" + rs.getString("imdb_id") + "\t" + rs.getString("fullpath"), szExport);
             }
         } catch (SQLException ex) {
             Logger lgr = Logger.getLogger(xbmcHandler.class.getName());

@@ -132,7 +132,7 @@ public class Sender {
                 while (true) {
 
                     try {
-//                        System.out.println("In QUEUE " + Q.peek());
+                        System.out.println("In QUEUE " + Q.peek());
                         processQ(Q.take());
 //                        System.out.println(Q.take());
                         //MsgParser.parseMSG(PullQ(Q.take()));
@@ -150,7 +150,7 @@ public class Sender {
 
     public static void putQ(String DestUID, String szMSG) {
         String theMessage = Config.readProp("My.Uid", Config.cfgFile) + Request.sep + DestUID + Request.sep + szMSG;
-//        System.out.println("Putting in Q: " + theMessage);
+        System.out.println("Putting in Q: " + theMessage);
         try {
             Q.put(theMessage);
         } catch (InterruptedException ex) {
@@ -162,11 +162,13 @@ public class Sender {
         String[] szQmsg = szQ.split(",,");
         for (int i = 0; i < szQmsg.length; i++) {
             System.out.println(szQmsg[i]);
-                }
+        }
         //test for valid socket connection
         if (ConnectionHandler.sockets.get(szQmsg[1]).isConnected()) {
             if (szQmsg[2].equals("FIL")) {
                 SndFile(szQmsg[1], szQmsg[2], szQmsg[3], Integer.parseInt(szQmsg[4]), Integer.parseInt(szQmsg[5]));
+            } else if (szQmsg[2].equals("XLST")) {
+                SndXFile(szQmsg[1], szQmsg[2], szQmsg[3]);
             } else {
                 SndMSG(szQ, ConnectionHandler.sockets.get(szQmsg[1]));
             }
@@ -185,5 +187,41 @@ public class Sender {
         } catch (InterruptedException ex) {
             Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public static void SndXFile(String szUUID, String szType, String szFile) {
+        FileInputStream fis = null;
+        try {
+            String sep = ",,";
+            System.out.println("Sending XLST " + szFile + " to " + szUUID);
+            Socket sock = ConnectionHandler.sockets.get(szUUID);
+            File myFile = new File(szFile);
+            String szSHA = Hasher.getSHA(szFile);
+            byte[] mybytearray = new byte[(int) myFile.length()];
+            fis = new FileInputStream(myFile);
+            BufferedInputStream bis = new BufferedInputStream(fis);
+            //bis.read(mybytearray, 0, mybytearray.length);
+            DataInputStream dis = new DataInputStream(bis);
+            dis.readFully(mybytearray, 0, mybytearray.length);
+            OutputStream os = sock.getOutputStream();
+            //Sending file name and file size to the server
+            DataOutputStream dos = new DataOutputStream(os);
+            dos.writeUTF(Node.myUid + sep + szUUID + sep + szType + sep + myFile.getName() + sep + szSHA);
+            dos.writeLong(mybytearray.length);
+            dos.write(mybytearray, 0, mybytearray.length);
+            dos.flush();
+//            dos.close();
+        } catch (FileNotFoundException ex) {
+            sndLOG.severe(ex.getMessage());
+        } catch (IOException ex) {
+            sndLOG.severe(ex.getMessage());
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException ex) {
+                sndLOG.severe(ex.getMessage());
+            }
+        }
+
     }
 }

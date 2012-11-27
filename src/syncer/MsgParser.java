@@ -17,7 +17,11 @@ public class MsgParser {
     public final static Logger msgLOG = Logger.getLogger(Syncer.class.getName());
 
     static void parseMSG(String[] szMSG) {
-//        System.out.println("Message objects:" + szMSG.length);
+        System.out.println("Message objects:" + szMSG.length);
+        for (int i = 0; i < szMSG.length; i++) {
+            System.out.print(i + ": " + szMSG[i] + " ");
+                }
+        System.out.println();
         String UID = szMSG[0];
 
         if (szMSG.length > 1) {
@@ -40,7 +44,7 @@ public class MsgParser {
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
                 ConnectionHandler.client2UID.put(szMSG[3], szMSG[0]);
 //                Sender.putQ(ConnectionHandler.client2UID.get("marctv"), "REQ,," + Syncer.szFile + ",,0");
-
+Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
             }
 
             if (szMSG[2].equals("COMPLETE")) {
@@ -91,16 +95,20 @@ public class MsgParser {
             }
             if (szMSG[2].equals("REQXLST")) {
                 System.out.println("Client requested xbmc list " + szMSG[0]);
+                String fl2Send = Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".csv";
+                if (new File(fl2Send).exists()) {
+                    new File(fl2Send).delete();
+                }
                 try {
-                    xbmcHandler.query();
-                    Sender.putQ(szMSG[0], "XLST,," + Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".csv" + ",,0");
+                    xbmcHandler.query(fl2Send);
+                    Sender.putQ(szMSG[0], "XLST" + sep +  fl2Send + sep + Hasher.getSHA(fl2Send));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
             }
 
         } else if (szMSG.length == 1) {
-            System.out.println(szMSG[0]);
+            System.out.println("Message is 1 object" + szMSG[0]);
 
         }
     }
