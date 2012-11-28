@@ -25,13 +25,14 @@ public class Syncer {
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //Config.cfgFile = "syncer.conf";
-        if (args.length > 0) {
-            String szServ = args[0];
-            szFile = args[1];
-            
-        }
+        
         Config.setHome();
         Config.checkDefaults();
+        if (args.length > 0) {
+            Config.cfgFile = args[0];
+            //szFile = args[1];
+            
+        }
         LogMan.setup();
         Sender sendQ = new Sender();
         Sender.Qwatcher();

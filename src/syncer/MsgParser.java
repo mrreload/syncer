@@ -17,11 +17,11 @@ public class MsgParser {
     public final static Logger msgLOG = Logger.getLogger(Syncer.class.getName());
 
     static void parseMSG(String[] szMSG) {
-        System.out.println("Message objects:" + szMSG.length);
-        for (int i = 0; i < szMSG.length; i++) {
-            System.out.print(i + ": " + szMSG[i] + " ");
-        }
-        System.out.println();
+//        System.out.println("Message objects:" + szMSG.length);
+//        for (int i = 0; i < szMSG.length; i++) {
+//            System.out.print(i + ": " + szMSG[i] + " ");
+//        }
+//        System.out.println();
         String UID = szMSG[0];
 
         if (szMSG.length > 1) {
@@ -84,6 +84,7 @@ public class MsgParser {
 //            System.out.println(szMSG[i]);
                 }
             }
+            
             if (szMSG[2].equals("XLST")) {
                 System.out.println("Received a XLST " + szMSG[0]);
                 String fileREQ = "Receiving: ";
@@ -91,8 +92,11 @@ public class MsgParser {
                     fileREQ = fileREQ + " " + szMSG[i];
                 }
                 msgLOG.info(fileREQ);
-                Receiver.rcvXLST(szMSG, UID);
+                String szListPath = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + UID + File.separatorChar + "XBMC"  + File.separatorChar;
+                
+                xbmcHandler.xbmcSyncMain(Receiver.rcvXLST(szMSG, UID, szListPath), UID);
             }
+            
             if (szMSG[2].equals("REQXLST")) {
                 System.out.println("Client requested xbmc list " + szMSG[0]);
                 String fl2Send = Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".txt";

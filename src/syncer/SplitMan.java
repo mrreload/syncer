@@ -19,6 +19,7 @@ public class SplitMan {
         if (!new File(szOutDir).exists()) {
             new File(szOutDir).mkdirs();
         }
+        System.out.println("Starting FileSplitter for: " + szFile);
         FileInputStream fis = new FileInputStream(szFile);
         String fileName;
         String szOutFile;

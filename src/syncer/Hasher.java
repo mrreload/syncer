@@ -17,9 +17,10 @@ public class Hasher {
     public static String getSHA(String szFileIn) {
         StringBuilder sb = null;
         FileInputStream fis = null;
+        System.out.println("Hashing: " + szFileIn);
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            fis = new FileInputStream(szFileIn.replaceAll("\"", ""));
+            fis = new FileInputStream(szFileIn);
             byte[] dataBytes = new byte[1024];
             int nread = 0;
             while ((nread = fis.read(dataBytes)) != -1) {

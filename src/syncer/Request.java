@@ -4,6 +4,7 @@
  */
 package syncer;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.Comparator;
@@ -36,19 +37,23 @@ public class Request {
             reqChunk(szFile, UID);
         }
 
-        new Thread(new Runnable() {
-            public void run() {
+//        new Thread(new Runnable() {
+//            public void run() {
                 try {
-                    Sender.fullHash = Hasher.getSHA(FILE);
+                    
                     Sender.OrgFileName = FILE;
-                    Sender.SendList(clientuuid, "FIL", SplitMan.FileSplitter(FILE, Config.readProp("sender.tmp", Config.cfgFile)));
+                    if (new File(FILE).exists()) {
+                        Sender.fullHash = Hasher.getSHA(FILE);
+                        Sender.SendList(clientuuid, "FIL", SplitMan.FileSplitter(FILE, Config.readProp("sender.tmp", Config.cfgFile)));
+                    }
+                    
                 } catch (IOException ex) {
                     Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (Exception ex) {
                     Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }
-        }).start();
+//            }
+//        }).start();
 //        System.out.println("Sending Requested Files...");
 
     }

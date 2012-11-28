@@ -114,48 +114,49 @@ public class Receiver {
             }
         }
 
-            if ((iCurrentChunk == iTotalChunk) && iTotalChunk != 0 && iCurrentChunk > 0) {
-                System.out.println("Assembling");
-                new Thread(new Runnable() {
-                    public void run() {
+        if ((iCurrentChunk == iTotalChunk) && iTotalChunk != 0 && iCurrentChunk > 0) {
+            System.out.println("Assembling");
+//            new Thread(new Runnable() {
+//                public void run() {
 
-                        String szOutFileFinal = null;
-                        File[] szFileList = null;
-                        try {
-                            szFileList = (File[]) alFiles.toArray(new File[0]);
-                            alFiles.clear();
-                            String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
-                            if (!new File(szOutFolder).exists()) {
-                                new File(szOutFolder).mkdirs();
-                            }
-
-                            szOutFileFinal = szOutFolder + File.separatorChar + (new File(Receiver.szOrgFileName).getName());
-                            SplitMan.FileJoiner(szFileList, szOutFileFinal);
-                            //                    System.out.println("Back to Listen");
-                        } catch (Exception ex) {
-                            Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+                    String szOutFileFinal = null;
+                    File[] szFileList = null;
+                    try {
+                        szFileList = (File[]) alFiles.toArray(new File[0]);
+                        alFiles.clear();
+                        String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
+                        if (!new File(szOutFolder).exists()) {
+                            new File(szOutFolder).mkdirs();
                         }
-                        if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
-                            System.out.println("CheckSums match");
 
-                            szFileList = null;
+                        szOutFileFinal = szOutFolder + File.separatorChar + (new File(Receiver.szOrgFileName).getName());
+                        SplitMan.FileJoiner(szFileList, szOutFileFinal);
+                        //                    System.out.println("Back to Listen");
+                    } catch (Exception ex) {
+                        Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
+                        System.out.println("CheckSums match");
+
+                        szFileList = null;
 
 //                            Sender.SndMSG("COMPLETE", RemoteUID);
-                            Sender.putQ(RemoteUID, "COMPLETE");
-                            
-                        } else {
-                            System.out.println(szSHAFull);
-                            System.out.println(Hasher.getSHA(szOutFileFinal));
-                        }
+                        Sender.putQ(RemoteUID, "COMPLETE");
+
+                    } else {
+                        System.out.println(szSHAFull);
+                        System.out.println(Hasher.getSHA(szOutFileFinal));
                     }
-                }).start();
-            }
+//                }
+//            }).start();
         }
-    public static void rcvXLST(String[] szFileInfo, String UID) {
+    }
+
+    public static String rcvXLST(String[] szFileInfo, String UID, String szFilePath) {
 
         System.out.println("Receiving XLST length: " + szFileInfo.length);
         int bytesRead;
-
+        String szFullFilePath = null;
         boolean blReceive = true;
         if (alFiles == null) {
             alFiles = new ArrayList<>();
@@ -164,24 +165,19 @@ public class Receiver {
             badFiles = new ArrayList<>();
         }
         while (blReceive) {
-//            InputStream in = null;
+
             try {
                 DataInputStream clientData = new DataInputStream(ConnectionHandler.inStreams.get(UID));
                 String fileName = szFileInfo[3];
                 String szSHA = szFileInfo[4];
-//                int index = Integer.parseInt(szFileInfo[4]);
-//                iCurrentChunk = index + 1;
-//                iTotalChunk = Integer.parseInt(szFileInfo[5]);
-//                szSHAFull = szFileInfo[6];
-//                szOrgFileName = szFileInfo[7];
-                String szFileOutPath = Config.readProp("receive.tmp", Config.cfgFile);
-                if (!new File(szFileOutPath).exists()) {
-                    new File(szFileOutPath).mkdirs();
+
+                if (!new File(szFilePath).exists()) {
+                    new File(szFilePath).mkdirs();
                 }
-                String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
-                OutputStream output = new FileOutputStream(szCurrentChunk);
+                szFullFilePath = szFilePath + fileName;
+                OutputStream output = new FileOutputStream(szFullFilePath);
                 long size = clientData.readLong();
-                System.out.println("Receiving: " + szCurrentChunk + " Size: " + size + " SHA256: " + szSHA);
+                System.out.println("Receiving: " + szFullFilePath + " Size: " + size + " SHA256: " + szSHA);
                 byte[] buffer = new byte[1024];
                 while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
                     output.write(buffer, 0, bytesRead);
@@ -190,25 +186,13 @@ public class Receiver {
 
                 output.flush();
                 output.close();
-                // Add file to received collection, must check for matching source file
-//                if (Receiver.verifyHash(szSHA, Hasher.getSHA(szCurrentChunk))) {
-//
-//                    alFiles.add(index, new File(szCurrentChunk));
-//
-//                } else {
-//                    //add logic to re-send corrupt chunk
-//                    System.out.println("Chunk is BAD!");
-//                    badFiles.ensureCapacity(index);
-//                    badFiles.add(szFileInfo);
-//
-//                }
-//                checkAndAssemble(UID);
+
                 System.out.println("Done receiving XBMC db export from: " + szFileInfo[1]);
                 blReceive = false;
             } catch (IOException ex) {
                 rcvLOG.severe(ex.getMessage());
             }
         }
-//        checkAndAssemble(UID);
+        return szFullFilePath;
     }
-    }
+}
