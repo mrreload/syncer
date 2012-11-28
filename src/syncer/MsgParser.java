@@ -20,7 +20,7 @@ public class MsgParser {
         System.out.println("Message objects:" + szMSG.length);
         for (int i = 0; i < szMSG.length; i++) {
             System.out.print(i + ": " + szMSG[i] + " ");
-                }
+        }
         System.out.println();
         String UID = szMSG[0];
 
@@ -44,7 +44,7 @@ public class MsgParser {
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
                 ConnectionHandler.client2UID.put(szMSG[3], szMSG[0]);
 //                Sender.putQ(ConnectionHandler.client2UID.get("marctv"), "REQ,," + Syncer.szFile + ",,0");
-Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
+                Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
             }
 
             if (szMSG[2].equals("COMPLETE")) {
@@ -95,13 +95,13 @@ Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.read
             }
             if (szMSG[2].equals("REQXLST")) {
                 System.out.println("Client requested xbmc list " + szMSG[0]);
-                String fl2Send = Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".csv";
+                String fl2Send = Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".txt";
                 if (new File(fl2Send).exists()) {
                     new File(fl2Send).delete();
                 }
                 try {
                     xbmcHandler.query(fl2Send);
-                    Sender.putQ(szMSG[0], "XLST" + sep +  fl2Send + sep + Hasher.getSHA(fl2Send));
+                    Sender.putQ(szMSG[0], "XLST" + sep + fl2Send + sep + Hasher.getSHA(fl2Send));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

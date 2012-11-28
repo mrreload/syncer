@@ -40,12 +40,18 @@ public class xbmcHandler {
         try {
 
             con = (Connection) DriverManager.getConnection(url, dbuser, dbpass);
-            pst = con.prepareStatement("SELECT movie.idFile, movie.c00 as Title, movie.c07 as Year, movie.c09 as imdb_id, concat(path.strPath, files.strFilename) as fullpath FROM MyVideos72.movie join path, files where path.idPath = files.idPath and movie.idfile = files.idfile order by movie.idfile;");
+            pst = con.prepareStatement("SELECT movie.idFile, movie.c00 as Title, movie.c07 as Year, "
+                    + "movie.c09 as imdb_id, concat(path.strPath, files.strFilename) "
+                    + "as fullpath, streamdetails.iVideoWidth as videoQ FROM movie "
+                    + "left join files on movie.idfile = files.idfile "
+                    + "left join path on files.idPath = path.idPath "
+                    + "left join streamdetails on movie.idfile = streamdetails.idfile and streamdetails.iVideoWidth is not null "
+                    + "order by movie.idfile;");
             rs = pst.executeQuery();
 
             while (rs.next()) {
 
-                csvWrite(rs.getInt("idFile") + "\t" + rs.getString("Title") + "\t" + rs.getString("Year") + "\t" + rs.getString("imdb_id") + "\t" + rs.getString("fullpath"), szExport);
+                csvWrite(rs.getInt("idFile") + "\t" + rs.getString("Title") + "\t" + rs.getString("Year") + "\t" + rs.getString("imdb_id") + "\t" + rs.getString("fullpath") + "\t" + rs.getString("videoQ"), szExport);
             }
         } catch (SQLException ex) {
             Logger lgr = Logger.getLogger(xbmcHandler.class.getName());
@@ -72,6 +78,7 @@ public class xbmcHandler {
         try {
             FileWriter fwrite = new FileWriter(szFile, true);
             BufferedWriter bw = new BufferedWriter(fwrite);
+            System.out.println(sztext);
             bw.write(sztext);
             bw.newLine();
             bw.close();;
