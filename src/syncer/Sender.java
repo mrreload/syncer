@@ -13,7 +13,7 @@ import java.util.logging.Logger;
 
 public class Sender {
 
-    public static String fullHash;
+//    public static String fullHash;
     public static String OrgFileName;
     public static boolean BadFile;
     static boolean RemoteCanReceive;
@@ -25,7 +25,7 @@ public class Sender {
         Q = new PriorityBlockingQueue<>();
     }
 
-    public static void SndFile(String szUUID, String szType, String szFile, int iCurrentFile, int iTotalFile) {
+    public static void SndFile(String szUUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFile, String fullHash) {
         FileInputStream fis = null;
         try {
             String sep = ",,";
@@ -42,7 +42,7 @@ public class Sender {
             OutputStream os = sock.getOutputStream();
             //Sending file name and file size to the server
             DataOutputStream dos = new DataOutputStream(os);
-            dos.writeUTF(Node.myUid + sep + szType + sep + myFile.getName() + sep + szSHA + sep + iCurrentFile + sep + iTotalFile + sep + fullHash + sep + OrgFileName);
+            dos.writeUTF(Node.myUid + sep + szType + sep + myFile.getName() + sep + szSHA + sep + iCurrentFile + sep + iTotalFile + sep + fullHash + sep + szOrgFile);
             dos.writeLong(mybytearray.length);
             dos.write(mybytearray, 0, mybytearray.length);
             dos.flush();
@@ -61,13 +61,13 @@ public class Sender {
 
     }
 
-    public static void SendList(String szUUID, String szType, String[] szList) throws IOException, Exception {
+    public static void SendList(String szUUID, String szType, String[] szList, String OrgFileName, String theHash) throws IOException, Exception {
 
         for (int i = 0; i < szList.length; i++) {
             //senderBusy = true;
 //            System.out.println(szList[i]);
 //            SndFile(szUUID, szType, szList[i], i, szList.length);
-            putFileQ(szUUID, szType, szList[i], i, szList.length);
+            putFileQ(szUUID, szType, szList[i], i, szList.length, OrgFileName, theHash);
         }
         //senderBusy = false;
 
@@ -132,7 +132,7 @@ public class Sender {
                 while (true) {
 
                     try {
-                        System.out.println("In QUEUE " + Q.peek());
+//                        System.out.println("In QUEUE " + Q.peek());
                         processQ(Q.take());
 //                        System.out.println(Q.take());
                         //MsgParser.parseMSG(PullQ(Q.take()));
@@ -149,7 +149,7 @@ public class Sender {
     }
 
     public static void putQ(String DestUID, String szMSG) {
-        String theMessage = Config.readProp("My.Uid", Config.cfgFile) + Request.sep + DestUID + Request.sep + szMSG;
+        String theMessage = Config.readProp("My.Uid", Config.cfgFile) + sep + DestUID + sep + szMSG;
         System.out.println("Putting in Q: " + theMessage);
         try {
             Q.put(theMessage);
@@ -159,14 +159,14 @@ public class Sender {
     }
 
     private static void processQ(String szQ) {
-        String[] szQmsg = szQ.split(",,");
-        for (int i = 0; i < szQmsg.length; i++) {
-            System.out.println(szQmsg[i]);
-        }
+        String[] szQmsg = szQ.split(sep);
+//        for (int i = 0; i < szQmsg.length; i++) {
+//            System.out.println(szQmsg[i]);
+//        }
         //test for valid socket connection
         if (ConnectionHandler.sockets.get(szQmsg[1]).isConnected()) {
             if (szQmsg[2].equals("FIL")) {
-                SndFile(szQmsg[1], szQmsg[2], szQmsg[3], Integer.parseInt(szQmsg[4]), Integer.parseInt(szQmsg[5]));
+                SndFile(szQmsg[1], szQmsg[2], szQmsg[3], Integer.parseInt(szQmsg[4]), Integer.parseInt(szQmsg[5]), szQmsg[6], szQmsg[7]);
             } else if (szQmsg[2].equals("XLST")) {
                 SndXFile(szQmsg[1], szQmsg[2], szQmsg[3]);
             } else {
@@ -178,8 +178,8 @@ public class Sender {
 
     }
 
-    public static void putFileQ(String DestUID, String szType, String szFile, int iCurrentFile, int iTotalFile) {
-        String szMSG = szType + sep + szFile + sep + iCurrentFile + sep + iTotalFile;
+    public static void putFileQ(String DestUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFileName, String szFullHash) {
+        String szMSG = szType + sep + szFile + sep + iCurrentFile + sep + iTotalFile + sep + szOrgFileName + sep + szFullHash;
         String theMessage = Config.readProp("My.Uid", Config.cfgFile) + Request.sep + DestUID + Request.sep + szMSG;
 //        System.out.println("Putting in Q: " + theMessage);
         try {

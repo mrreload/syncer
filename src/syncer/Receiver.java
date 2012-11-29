@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class Receiver {
 
-    static String szOrgFileName;
+    //static String szOrgFileName;
     static String szSHAFull;
     static ArrayList<String[]> badFiles;
     static String[] szElements;
@@ -34,7 +34,7 @@ public class Receiver {
 
         System.out.println(szFileInfo.length);
         int bytesRead;
-
+        String szOrgFileName = null;
         boolean blReceive = true;
         if (alFiles == null) {
             alFiles = new ArrayList<>();
@@ -62,7 +62,7 @@ public class Receiver {
                 String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
                 OutputStream output = new FileOutputStream(szCurrentChunk);
                 long size = clientData.readLong();
-                System.out.println("Receiving: " + szCurrentChunk + " Size: " + size + " Chunk#: " + iCurrentChunk);
+                System.out.println("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk);
                 byte[] buffer = new byte[1024];
                 while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
                     output.write(buffer, 0, bytesRead);
@@ -89,7 +89,7 @@ public class Receiver {
                 rcvLOG.severe(ex.getMessage());
             }
         }
-        checkAndAssemble(UID);
+        checkAndAssemble(UID, szOrgFileName);
     }
 
     static boolean verifyHash(String szOrgData, String szNewData) {
@@ -102,7 +102,7 @@ public class Receiver {
         return blCheck;
     }
 
-    static void checkAndAssemble(String UID) {
+    static void checkAndAssemble(String UID, String szOrgFileName) {
         final String RemoteUID = UID;
         if (badFiles != null) {
 //            badList = (String[]) badFiles.toArray(new String[0]);
@@ -119,34 +119,34 @@ public class Receiver {
 //            new Thread(new Runnable() {
 //                public void run() {
 
-                    String szOutFileFinal = null;
-                    File[] szFileList = null;
-                    try {
-                        szFileList = (File[]) alFiles.toArray(new File[0]);
-                        alFiles.clear();
-                        String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
-                        if (!new File(szOutFolder).exists()) {
-                            new File(szOutFolder).mkdirs();
-                        }
+            String szOutFileFinal = null;
+            File[] szFileList = null;
+            try {
+                szFileList = (File[]) alFiles.toArray(new File[0]);
+                alFiles.clear();
+                String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
+                if (!new File(szOutFolder).exists()) {
+                    new File(szOutFolder).mkdirs();
+                }
 
-                        szOutFileFinal = szOutFolder + File.separatorChar + (new File(Receiver.szOrgFileName).getName());
-                        SplitMan.FileJoiner(szFileList, szOutFileFinal);
-                        //                    System.out.println("Back to Listen");
-                    } catch (Exception ex) {
-                        Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
-                        System.out.println("CheckSums match");
+                szOutFileFinal = szOutFolder + File.separatorChar + (new File(szOrgFileName).getName());
+                SplitMan.FileJoiner(szFileList, szOutFileFinal);
+                //                    System.out.println("Back to Listen");
+            } catch (Exception ex) {
+                Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
+                System.out.println("CheckSums match");
 
-                        szFileList = null;
+                szFileList = null;
 
 //                            Sender.SndMSG("COMPLETE", RemoteUID);
-                        Sender.putQ(RemoteUID, "COMPLETE");
+                Sender.putQ(RemoteUID, "COMPLETE");
 
-                    } else {
-                        System.out.println(szSHAFull);
-                        System.out.println(Hasher.getSHA(szOutFileFinal));
-                    }
+            } else {
+                System.out.println(szSHAFull);
+                System.out.println(Hasher.getSHA(szOutFileFinal));
+            }
 //                }
 //            }).start();
         }

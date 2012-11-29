@@ -17,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class Request {
 
-    static String FILE;
+//    static String FILE;
     static String CHUNK;
     static Socket sock;
     
@@ -31,7 +31,8 @@ public class Request {
         sock = ConnectionHandler.sockets.get(UID);
         System.out.println(szFile[0] + " Client requested file: " + szFile[3] + " chunk: " + szFile[4]);
         final String clientuuid = szFile[0];
-        FILE = szFile[3];
+//        String FileName = new File(szFile[3]).getName();
+        
         CHUNK = szFile[4];
         if (!CHUNK.equals("all")) {
             reqChunk(szFile, UID);
@@ -41,10 +42,10 @@ public class Request {
 //            public void run() {
                 try {
                     
-                    Sender.OrgFileName = FILE;
-                    if (new File(FILE).exists()) {
-                        Sender.fullHash = Hasher.getSHA(FILE);
-                        Sender.SendList(clientuuid, "FIL", SplitMan.FileSplitter(FILE, Config.readProp("sender.tmp", Config.cfgFile)));
+//                    Sender.OrgFileName = FILE;
+                    if (new File(szFile[3]).exists()) {
+                         String fullHash = Hasher.getSHA(szFile[3]);
+                        Sender.SendList(clientuuid, "FIL", SplitMan.FileSplitter(szFile[3], Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + fullHash), new File(szFile[3]).getName(), fullHash);
                     }
                     
                 } catch (IOException ex) {
