@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -91,6 +92,11 @@ public class Receiver {
         }
         checkAndAssemble(UID, szOrgFileName);
     }
+//    static void AddToMap(String fullhash, int chunk, String szFile) {
+//       
+//         Map<String, String> fullhash;
+//        if (fullhash-map)
+//    }
 
     static boolean verifyHash(String szOrgData, String szNewData) {
         boolean blCheck = false;
@@ -124,6 +130,7 @@ public class Receiver {
             try {
                 szFileList = (File[]) alFiles.toArray(new File[0]);
                 alFiles.clear();
+                
                 String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
                 if (!new File(szOutFolder).exists()) {
                     new File(szOutFolder).mkdirs();

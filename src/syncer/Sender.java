@@ -7,7 +7,7 @@ package syncer;
 import java.io.*;
 import java.net.Socket;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,7 +22,7 @@ public class Sender {
     public final static Logger sndLOG = Logger.getLogger(Sender.class.getName());
 
     Sender() {
-        Q = new PriorityBlockingQueue<>();
+        Q = new LinkedBlockingQueue<>();
     }
 
     public static void SndFile(String szUUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFile, String fullHash) {
