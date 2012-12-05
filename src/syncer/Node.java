@@ -65,7 +65,7 @@ public class Node {
             }
         }
 
-        Sender.SndMSG(myUid + separ + "ACK" + separ + Config.readProp("local.name", Config.cfgFile), nodeLocalSocket);
+        Sender.SndMSG(myUid + separ + "UNKNOWN" + separ + "ACK" + separ + Config.readProp("local.name", Config.cfgFile), nodeLocalSocket);
 
         new ConnectionHandler(nodeLocalSocket)
                 .start();

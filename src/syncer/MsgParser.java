@@ -28,23 +28,28 @@ public class MsgParser {
 //            for (int i = 0; i < szMSG.length; i++) {
 //                System.out.println(szMSG[i]);
 //            }
-            if (szMSG[1].equals("ACK")) {
+            if (szMSG[2].equals("ACK")) {
                 ConnectionHandler.uid = szMSG[0];
                 System.out.println("Received an ACK from " + szMSG[0] + " " + szMSG[2]);
-                Config.writeProp(szMSG[2], UID, Config.cfgFile);
+                Config.writeProp(szMSG[3], UID, Config.cfgFile);
                 ConnectionHandler.client2UID.put(szMSG[2], szMSG[0]);
-                Sender.putQ(szMSG[0], "READY" + sep + Config.readProp("local.name", Config.cfgFile));
+                Sender.putmQ(szMSG[0], "READY" + sep + Config.readProp("local.name", Config.cfgFile));
+                Operator.Ops(szMSG);
 //                Sender.putQ(ConnectionHandler.client2UID.get(szMSG[2]), "REQ,," + Syncer.szFile2 + ",,0");
+                // put checks for action needed here 
 
             }
 
             if (szMSG[2].equals("READY")) {
 //                ConnectionHandler.rStatus.put(UID, "READY");
-                System.out.println("READY Message received from Server " + szMSG[3] + " " + szMSG[0]);
+                System.out.println("READY Message received from Remote " + szMSG[3] + " " + szMSG[0]);
+                
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
                 ConnectionHandler.client2UID.put(szMSG[3], szMSG[0]);
+                Operator.Ops(szMSG);
 //                Sender.putQ(ConnectionHandler.client2UID.get("marctv"), "REQ,," + Syncer.szFile + ",,0");
-                Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
+                
+                // put checks for action needed here
             }
 
             if (szMSG[2].equals("COMPLETE")) {
@@ -105,7 +110,7 @@ public class MsgParser {
                 }
                 try {
                     xbmcHandler.query(fl2Send);
-                    Sender.putQ(szMSG[0], "XLST" + sep + fl2Send + sep + Hasher.getSHA(fl2Send));
+                    Sender.putmQ(szMSG[0], "XLST" + sep + fl2Send + sep + Hasher.getSHA(fl2Send));
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }

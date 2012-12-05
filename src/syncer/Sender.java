@@ -32,7 +32,7 @@ public class Sender {
     public static void SndFile(String szUUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFile, String fullHash) {
         FileInputStream fis = null;
         try {
-            String sep = ",,";
+            
             System.out.println("Sending file " + szFile + " to " + szUUID);
             Socket sock = ConnectionHandler.sockets.get(szUUID);
             File myFile = new File(szFile);
@@ -161,7 +161,7 @@ public class Sender {
         System.out.println("Q watcher started....");
     }
     
-    public static void putQ(String DestUID, String szMSG) {
+    public static void putmQ(String DestUID, String szMSG) {
         String theMessage = Config.readProp("My.Uid", Config.cfgFile) + sep + DestUID + sep + szMSG;
         System.out.println("Putting in Q: " + theMessage);
         try {
@@ -178,12 +178,16 @@ public class Sender {
 //        }
         //test for valid socket connection
         if (ConnectionHandler.sockets.get(szQmsg[1]).isConnected()) {
-            if (szQmsg[2].equals("FIL")) {
-                SndFile(szQmsg[1], szQmsg[2], szQmsg[3], Integer.parseInt(szQmsg[4]), Integer.parseInt(szQmsg[5]), szQmsg[6], szQmsg[7]);
-            } else if (szQmsg[2].equals("XLST")) {
-                SndXFile(szQmsg[1], szQmsg[2], szQmsg[3]);
-            } else {
-                SndMSG(szQ, ConnectionHandler.sockets.get(szQmsg[1]));
+            switch (szQmsg[2]) {
+                case "FIL":
+                    SndFile(szQmsg[1], szQmsg[2], szQmsg[3], Integer.parseInt(szQmsg[4]), Integer.parseInt(szQmsg[5]), szQmsg[6], szQmsg[7]);
+                    break;
+                case "XLST":
+                    SndXFile(szQmsg[1], szQmsg[2], szQmsg[3]);
+                    break;
+                default:
+                    SndMSG(szQ, ConnectionHandler.sockets.get(szQmsg[1]));
+                    break;
             }
         } else {
             System.out.println("Socket not connected");

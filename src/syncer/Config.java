@@ -161,6 +161,10 @@ public class Config {
         dSet("local.port", "13267");
         dSet("local.name", "dummy");
         dSet("My.Uid", "");
+        dSet("file.sync", "false");
+        dSet("local.watch.folders", "");
+        dSet("local.archive.folder", "");
+        dSet("xbmc.sync", "false");
         dSet("xbmc-db.user", "xbmc");
         dSet("xbmc-db.pass", "xbmc");
         dSet("xbmc-db.host", "localhost");
