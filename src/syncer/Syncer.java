@@ -37,7 +37,7 @@ public class Syncer {
         Sender sendQ = new Sender();
         Operator op = new Operator();
         Sender.Qwatcher();
-        Operator.Qwatcher();
+        Operator.Clientwatcher();
         if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("master")) {
 
             try {

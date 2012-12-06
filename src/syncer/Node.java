@@ -26,7 +26,7 @@ public class Node {
     static String separ = ",,";
     static String myUid;
 //    static String TempUid;
-    public final static Logger nodeLOG = Logger.getLogger(Syncer.class.getName());
+    public final static Logger nodeLOG = Logger.getLogger(Node.class.getName());
 
     static void connect(String szHost, int iPort) throws IOException {
         boolean blMasterAlive = false;

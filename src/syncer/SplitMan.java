@@ -6,6 +6,7 @@ package syncer;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,40 +16,48 @@ import java.util.logging.Logger;
  */
 public class SplitMan {
 
-    public static String[] FileSplitter(String szFile, String szOutDir) throws FileNotFoundException, IOException {
+    static String[] szFileList;
+
+    public static String[] FileSplitter(String szFile, String szOutDir, String szHash) throws FileNotFoundException, IOException {
         if (!new File(szOutDir).exists()) {
             new File(szOutDir).mkdirs();
         }
-        System.out.println("Starting FileSplitter for: " + szFile);
-        FileInputStream fis = new FileInputStream(szFile);
-        String fileName;
-        String szOutFile;
-        ArrayList<String> alFiles = new ArrayList<>();
-        int size = 1024 * 1024 * 5;
-        byte buffer[] = new byte[size];
+        if (!(calcSize(new File(szOutDir)) == new File(szFile).length())) {
+            System.out.println("Starting FileSplitter for: " + szFile);
+            FileInputStream fis = new FileInputStream(szFile);
+            String fileName;
+            String szOutFile;
+            ArrayList<String> alFiles = new ArrayList<>();
+            int size = 1024 * 1024 * 5;
+            byte buffer[] = new byte[size];
 
-        int count = 0;
-        while (true) {
+            int count = 0;
+            while (true) {
 
-            int i = fis.read(buffer, 0, size);
-            if (i == -1) {
-                break;
-            }
+                int i = fis.read(buffer, 0, size);
+                if (i == -1) {
+                    break;
+                }
 //            Sender.senderBusy = true;
-            fileName = String.format("%s.part%09d", szFile, count);
+                fileName = String.format("%s.part%09d", szFile, count);
 //            System.out.println(new File(fileName).getName());
-            szOutFile = szOutDir + File.separatorChar + new File(fileName).getName();
-            FileOutputStream fos = new FileOutputStream(szOutFile);
-            fos.write(buffer, 0, i);
-            fos.flush();
-            fos.close();
+                szOutFile = szOutDir + File.separatorChar + new File(fileName).getName();
+                FileOutputStream fos = new FileOutputStream(szOutFile);
+                fos.write(buffer, 0, i);
+                fos.flush();
+                fos.close();
 //            System.out.println(szOutFile);
-            alFiles.add(count, szOutFile);
-            ++count;
+                alFiles.add(count, szOutFile);
+                ++count;
 
+            }
+            szFileList = (String[]) alFiles.toArray(new String[0]);
+            System.out.println(count);
+        } else {
+            szFileList = getList(szOutDir);
         }
-        String[] szFileList = (String[]) alFiles.toArray(new String[0]);
-        System.out.println(count);
+        
+
 //        Sender.senderBusy = false;
         return szFileList;
     }
@@ -102,7 +111,7 @@ public class SplitMan {
         return length;
     }
 
-    public static File[] getList(String szDir) {
+    public static String[] getList(String szDir) {
 
         File file = new File(szDir);
         File[] files = file.listFiles();
@@ -111,6 +120,26 @@ public class SplitMan {
 //            System.out.println(files[fileInList].toString());
             szFiles[fileInList] = files[fileInList].toString();
         }
-        return files;
+        String[] szArray = Arrays.asList(files).toArray(new String[files.length]);
+        return szArray;
+    }
+
+    private static long calcSize(File dir) {
+        if (dir.isFile() && dir.canRead()) {
+            return dir.length();
+        }
+        long size = 0;
+        if (dir.exists() && dir.isDirectory() && dir.canRead()) {
+            for (File file : dir.listFiles()) { //Here NPE
+                if (file.isFile() && dir.canRead()) {
+                    size += file.length();
+                } else if (file.isDirectory()) {
+                    size += calcSize(file);
+                } else {
+                    throw new Error("What is this: " + file);
+                }
+            }
+        }
+        return size;
     }
 }

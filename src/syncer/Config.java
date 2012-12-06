@@ -19,12 +19,13 @@ import java.util.logging.Logger;
  * @author mrreload
  */
 public class Config {
+
     private final static Logger CFGLOG = Logger.getLogger(Config.class.getName());
 //    static String cfgFile;
     private static String LogFolder;
     private static String home;
     public static String cfgFile;
-    
+
     public static String readProp(String prop, String daFile) {
         String propval = null;
         Properties configFl = new Properties();
@@ -44,6 +45,7 @@ public class Config {
         return propval;
 
     }
+
     public static void writeProp(String property, String szs, String cfgFile) {
         boolean blSet = false;
         Properties configFile = new Properties();
@@ -65,13 +67,16 @@ public class Config {
         }
 
     }
+
     public static String getLogFolder() {
         return LogFolder;
     }
+
     public String getLogLevel() {
         String szLogLevel = readProp("log.level", cfgFile);
         return szLogLevel;
     }
+
     public static void setHome() {
         home = System.getProperty("user.home") + File.separatorChar + ".syncer" + File.separatorChar;
 
@@ -88,7 +93,7 @@ public class Config {
             log.mkdirs();
 
         }
-        
+
         String ConfigFolder = home + "config" + File.separatorChar;
         File cfg = new File(ConfigFolder);
         if (!cfg.exists()) {
@@ -100,6 +105,7 @@ public class Config {
 
 
     }
+
     private static String setCfgFL(String szConfigFolder) {
         cfgFile = szConfigFolder + "syncer.conf";
         File cf = new File(cfgFile);
@@ -120,6 +126,7 @@ public class Config {
         CFGLOG.info("Properties File at: " + cfgFile + " :INFO Only NOT an Error!");
         return cfgFile;
     }
+
     private static void dSet(String prop, String defVal) {
 
 
@@ -143,7 +150,7 @@ public class Config {
             try {
                 FileWriter fstream = new FileWriter(cfgFile);
                 BufferedWriter out = new BufferedWriter(fstream);
-                out.write("#MKV Builder Properties File");
+                out.write("#Syncer Properties File");
                 out.close();
 
             } catch (Exception e) {
@@ -162,15 +169,17 @@ public class Config {
         dSet("local.name", "dummy");
         dSet("My.Uid", "");
         dSet("file.sync", "false");
-        dSet("local.watch.folders", "");
-        dSet("local.archive.folder", "");
+        dSet("local.watch.folders", "none");
+        dSet("local.archive.point", "none");
         dSet("xbmc.sync", "false");
         dSet("xbmc-db.user", "xbmc");
         dSet("xbmc-db.pass", "xbmc");
         dSet("xbmc-db.host", "localhost");
         dSet("xbmc-db.port", "3306");
         dSet("xbmc-db.name", "MyVideos72");
+        dSet("sync.partners.xbmc.csv", "none");
+        dSet("sync.partners.file.csv", "none");
         dSet("log.level", "4");
-        
+
     }
 }

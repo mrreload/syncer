@@ -45,7 +45,7 @@ public class Request {
 //                    Sender.OrgFileName = FILE;
                     if (new File(szFile[3]).exists()) {
                          String fullHash = Hasher.getSHA(szFile[3]);
-                        Sender.SendList(clientuuid, "FIL", SplitMan.FileSplitter(szFile[3], Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + fullHash), new File(szFile[3]).getName(), fullHash);
+                        Sender.SendList(clientuuid, "FIL", SplitMan.FileSplitter(szFile[3], Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + fullHash, fullHash), new File(szFile[3]).getName(), fullHash);
                     }
                     
                 } catch (IOException ex) {

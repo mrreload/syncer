@@ -49,7 +49,7 @@ public class xbmcHandler {
                     + "left join files on movie.idfile = files.idfile "
                     + "left join path on files.idPath = path.idPath "
                     + "left join streamdetails on movie.idfile = streamdetails.idfile and streamdetails.iVideoWidth is not null "
-                    + "order by movie.idfile desc limit 3;");
+                    + "order by movie.idfile desc limit 1;");
             rs = pst.executeQuery();
 
             while (rs.next()) {

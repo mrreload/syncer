@@ -19,7 +19,7 @@ public class ConnectionHandler extends Thread {
     Socket conn = new Socket();
     static Map<String, Socket> sockets = Collections.synchronizedMap(new HashMap<String, Socket>());
     static Map<String, InputStream> inStreams = Collections.synchronizedMap(new HashMap<String, InputStream>());
-    static Map<String, String> client2UID = Collections.synchronizedMap(new HashMap<String, String>());
+//    static Map<String, String> client2UID = Collections.synchronizedMap(new HashMap<String, String>());
     final String separ = ",,";
     String[] szElements;
     static String uid;
@@ -33,6 +33,7 @@ public class ConnectionHandler extends Thread {
 
         try {
             if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("master")) {
+                
                 Master.MasterMain(conn);
 
 

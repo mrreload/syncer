@@ -23,7 +23,7 @@ public class Receiver {
     static String szSHAFull;
     static ArrayList<String[]> badFiles;
     static String[] szElements;
-    static String separ = ",,";
+    static String sep = ",,";
     static int iCurrentChunk;
     static int iTotalChunk;
     static ArrayList<File> alFiles;
@@ -147,7 +147,8 @@ public class Receiver {
                 szFileList = null;
 
 //                            Sender.SndMSG("COMPLETE", RemoteUID);
-                Sender.putmQ(RemoteUID, "COMPLETE");
+                Sender.putmQ(RemoteUID, "COMPLETE" + sep + szSHAFull);
+                CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
 
             } else {
                 System.out.println(szSHAFull);

@@ -30,14 +30,12 @@ public class MsgParser {
 //            }
             if (szMSG[2].equals("ACK")) {
                 ConnectionHandler.uid = szMSG[0];
-                System.out.println("Received an ACK from " + szMSG[0] + " " + szMSG[2]);
+                System.out.println("Received an ACK from " + szMSG[0] + " " + szMSG[3]);
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
-                ConnectionHandler.client2UID.put(szMSG[2], szMSG[0]);
+                
                 Sender.putmQ(szMSG[0], "READY" + sep + Config.readProp("local.name", Config.cfgFile));
-                Operator.Ops(szMSG);
-//                Sender.putQ(ConnectionHandler.client2UID.get(szMSG[2]), "REQ,," + Syncer.szFile2 + ",,0");
-                // put checks for action needed here 
-
+                Operator.Clients.put(szMSG[3], szMSG[0]);
+                
             }
 
             if (szMSG[2].equals("READY")) {
@@ -45,11 +43,9 @@ public class MsgParser {
                 System.out.println("READY Message received from Remote " + szMSG[3] + " " + szMSG[0]);
                 
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
-                ConnectionHandler.client2UID.put(szMSG[3], szMSG[0]);
-                Operator.Ops(szMSG);
-//                Sender.putQ(ConnectionHandler.client2UID.get("marctv"), "REQ,," + Syncer.szFile + ",,0");
                 
-                // put checks for action needed here
+                Operator.Clients.put(szMSG[3], szMSG[0]);
+                
             }
 
             if (szMSG[2].equals("COMPLETE")) {
@@ -59,6 +55,8 @@ public class MsgParser {
                 for (int i = 0; i < szMSG.length; i++) {
 //            System.out.println(szMSG[i]);
                 }
+                System.out.println("We would delete: " + Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
+//                CleanUp.deleteDir(Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
             }
 
             if (szMSG[2].equals("WAIT")) {
