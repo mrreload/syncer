@@ -176,6 +176,7 @@ public class Sender {
 //        for (int i = 0; i < szQmsg.length; i++) {
 //            System.out.println(szQmsg[i]);
 //        }
+        
         //test for valid socket connection
         if (ConnectionHandler.sockets.get(szQmsg[1]).isConnected()) {
             switch (szQmsg[2]) {

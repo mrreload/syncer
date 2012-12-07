@@ -179,6 +179,21 @@ public class Config {
         dSet("xbmc-db.name", "MyVideos72");
         dSet("sync.partners.xbmc.csv", "none");
         dSet("sync.partners.file.csv", "none");
+        dSet("xbmc.sync.use.timer", "true");
+        dSet("Sun.time", "2:00");
+        dSet("Sun.length", "10:00");
+        dSet("Mon.time", "2:00");
+        dSet("Mon.length", "10:00");
+        dSet("Tue.time", "2:00");
+        dSet("Tue.length", "10:00");
+        dSet("Wed.time", "2:00");
+        dSet("Wed.length", "10:00");
+        dSet("Thu.time", "2:00");
+        dSet("Thu.length", "10:00");
+        dSet("Fri.time", "2:00");
+        dSet("Fri.length", "10:00");
+        dSet("Sat.time", "2:00");
+        dSet("Sat.length", "10:00");
         dSet("log.level", "4");
 
     }

@@ -29,6 +29,8 @@ public class Node {
     public final static Logger nodeLOG = Logger.getLogger(Node.class.getName());
 
     static void connect(String szHost, int iPort) throws IOException {
+        Timer tmr = new Timer();
+        tmr.TimerInit();
         boolean blMasterAlive = false;
         if (Config.readProp("My.Uid", Config.cfgFile).equals("")) {
             Node.myUid = UUID.randomUUID().toString();

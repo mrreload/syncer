@@ -89,7 +89,16 @@ public class Receiver {
                 rcvLOG.severe(ex.getMessage());
             }
         }
-        checkAndAssemble(UID, szOrgFileName);
+
+        if (checkAndAssemble(UID, szOrgFileName)) {
+            Sender.putmQ(UID, "COMPLETE" + sep + szSHAFull);
+            xbmcHandler.removeLineFromFile(szOrgFileName, Operator.szREQlogfolder + UID + ".txt");
+            CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
+        } else {
+            System.out.println("Failed to assemble: " + szOrgFileName);
+            rcvLOG.severe("Failed to assemble: " + szOrgFileName);
+        }
+
     }
 //    static void AddToMap(String fullhash, int chunk, String szFile) {
 //       
@@ -107,8 +116,9 @@ public class Receiver {
         return blCheck;
     }
 
-    static void checkAndAssemble(String UID, String szOrgFileName) {
-        final String RemoteUID = UID;
+    static boolean checkAndAssemble(String UID, String szOrgFileName) {
+        boolean blComplete = false;
+
         if (badFiles != null) {
 //            badList = (String[]) badFiles.toArray(new String[0]);
 //            for (int i = 0; i < badList.length; i++) {
@@ -129,7 +139,7 @@ public class Receiver {
             try {
                 szFileList = (File[]) alFiles.toArray(new File[0]);
                 alFiles.clear();
-                
+
                 String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
                 if (!new File(szOutFolder).exists()) {
                     new File(szOutFolder).mkdirs();
@@ -143,20 +153,20 @@ public class Receiver {
             }
             if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
                 System.out.println("CheckSums match");
+                blComplete = true;
 
                 szFileList = null;
 
 //                            Sender.SndMSG("COMPLETE", RemoteUID);
-                Sender.putmQ(RemoteUID, "COMPLETE" + sep + szSHAFull);
-                CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
+
 
             } else {
                 System.out.println(szSHAFull);
                 System.out.println(Hasher.getSHA(szOutFileFinal));
             }
-//                }
-//            }).start();
+
         }
+        return blComplete;
     }
 
     public static String rcvXLST(String[] szFileInfo, String UID, String szFilePath) {
