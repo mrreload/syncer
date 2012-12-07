@@ -119,6 +119,7 @@ public class xbmcHandler {
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
                     System.out.println("Not in local db " + lineArray[3]);
+                    
                     String szREQlog = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc" + File.separatorChar;
                     if (!new File(szREQlog).exists()) {
                         new File(szREQlog).mkdirs();

@@ -37,8 +37,8 @@ public class Operator {
         //System.out.println(Config.readProp("xbmc.sync", Config.cfgFile));
         if (Config.readProp("xbmc.sync", Config.cfgFile).equalsIgnoreCase("true")) {
             // xbmc sync ops here
-            // look for unfinished work for connected node(s) and request remaining files
-
+            
+            
             //otherwise request new list and sync
 
             while (Config.readProp("sync.partners.xbmc.csv", Config.cfgFile) != null && !Clients.isEmpty()) {
@@ -46,6 +46,10 @@ public class Operator {
                 // find if configured clients are connected
                 for (int c = 0; c < client.length; c++) {
                     if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
+                        // look for unfinished work for connected node(s) and request remaining files
+//                        while (true) {
+//                            
+//                        }
                         Sender.putmQ(Clients.get(client[c]), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
                         XbmcREQSent.put(client[c], "true");
                     } else {
