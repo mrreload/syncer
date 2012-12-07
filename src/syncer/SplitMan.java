@@ -55,10 +55,14 @@ public class SplitMan {
             System.out.println(count);
         } else {
             szFileList = getList(szOutDir);
+//            for (int i = 0; i < szFileList.length; i++) {
+//                System.out.println(szFileList[i]);
+//            }
         }
-        
+
 
 //        Sender.senderBusy = false;
+        
         return szFileList;
     }
 
@@ -120,8 +124,9 @@ public class SplitMan {
 //            System.out.println(files[fileInList].toString());
             szFiles[fileInList] = files[fileInList].toString();
         }
-        String[] szArray = Arrays.asList(files).toArray(new String[files.length]);
-        return szArray;
+//        String[] szArray = Arrays.asList(files).toArray(new String[files.length]);
+        java.util.Arrays.sort(szFiles);
+        return szFiles;
     }
 
     private static long calcSize(File dir) {

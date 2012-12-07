@@ -46,6 +46,7 @@ public class Operator {
                 String client[] = Config.readProp("sync.partners.xbmc.csv", Config.cfgFile).split(",");
                 // find if configured clients are connected and do work
                 for (int c = 0; c < client.length; c++) {
+                    System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
                     if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
                         worker(client[c]);
                     } else {
