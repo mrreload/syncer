@@ -125,6 +125,9 @@ public class WatchDir {
 
                 // print out event
                 System.out.format("%s: %s\n", event.kind().name(), child);
+                System.out.println(event.kind().name());
+                System.out.println(child);
+                
 
                 // if directory is created, and watching recursively, then
                 // register it and its sub-directories
@@ -155,7 +158,7 @@ public class WatchDir {
     
     public static void Watcher(String szDir) throws IOException {
         
-        boolean recursive = true;
+        boolean recursive = false;
         
         
         // register directory and process its events

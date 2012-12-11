@@ -20,12 +20,12 @@ public class Syncer {
      */
     public final static Logger mainLOG = Logger.getLogger(Syncer.class.getName());
     static String szFile = "/home/xbmc/test/hsqldb-2.2.8.zip";
-    static String szFile2 = "C:" + File.separatorChar + "temp" + File.separatorChar + "test.zip";
+    static String szFile2 = "C:" + File.separatorChar + "temp";
     static String szFile3 = "/home/media/test/test.zip";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //Config.cfgFile = "syncer.conf";
-        
+        WatchDir.Watcher(szFile2);
         Config.setHome();
         Config.checkDefaults();
         if (args.length > 0) {

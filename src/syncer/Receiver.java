@@ -93,7 +93,6 @@ public class Receiver {
 
         if (checkAndAssemble(UID, szOrgFileName)) {
             Sender.putmQ(UID, "COMPLETE" + sep + szSHAFull);
-            xbmcHandler.removeLineFromFile(szOrgFileName, Operator.szREQlogfolder + UID + ".txt");
             CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
         } else if (!blGotAllChunks) {
             //Do nothing just wait for rest of chunks. loop
@@ -153,15 +152,20 @@ public class Receiver {
                 SplitMan.FileJoiner(szFileList, szOutFileFinal);
                 //                    System.out.println("Back to Listen");
             } catch (Exception ex) {
-                Logger.getLogger(Request.class.getName()).log(Level.SEVERE, null, ex);
+                rcvLOG.severe(ex.getMessage());
             }
             if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
-                System.out.println("CheckSums match");
-                blComplete = true;
+                try {
+                    System.out.println("CheckSums match");
+                    Operator.FinishedFilesQ.put(szOutFileFinal);
+                    blComplete = true;
 
-                szFileList = null;
+                    szFileList = null;
 
-//                            Sender.SndMSG("COMPLETE", RemoteUID);
+    //                            Sender.SndMSG("COMPLETE", RemoteUID);
+                } catch (InterruptedException ex) {
+                    rcvLOG.severe(ex.getMessage());
+                }
 
 
             } else {

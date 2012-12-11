@@ -123,10 +123,10 @@ public class xbmcHandler {
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
                     System.out.println("Not in local db " + lineArray[3]);
-                    if (!new File(Operator.szREQlogfolder).exists()) {
-                        new File(Operator.szREQlogfolder).mkdirs();
+                    if (!new File(Operator.szREQlogfolderXBMC).exists()) {
+                        new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
-                    csvWrite(strLine, Operator.szREQlogfolder + szUID + ".txt");
+                    csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
                     Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,0");
                 }
 
@@ -197,8 +197,8 @@ public class xbmcHandler {
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
                     System.out.println("Not in local db " + lineArray[3]);
-                    if (!new File(Operator.szREQlogfolder).exists()) {
-                        new File(Operator.szREQlogfolder).mkdirs();
+                    if (!new File(Operator.szREQlogfolderXBMC).exists()) {
+                        new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
 
                     Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,0");
