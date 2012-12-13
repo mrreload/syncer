@@ -32,9 +32,9 @@ public class MsgParser {
                 ConnectionHandler.uid = szMSG[0];
                 System.out.println("Received an ACK from " + szMSG[0] + " " + szMSG[3]);
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
-                
-                Sender.putmQ(szMSG[0], "READY" + sep + Config.readProp("local.name", Config.cfgFile));
                 Operator.Clients.put(szMSG[3], szMSG[0]);
+                Sender.putmQ(szMSG[0], "READY" + sep + Config.readProp("local.name", Config.cfgFile));
+                
                 
             }
 
@@ -94,10 +94,9 @@ public class MsgParser {
                 for (int i = 0; i < szMSG.length; i++) {
                     fileREQ = fileREQ + " " + szMSG[i];
                 }
-                msgLOG.info(fileREQ);
-                String szListPath = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + UID + File.separatorChar + "XBMC"  + File.separatorChar;
+                msgLOG.info(fileREQ);                
                 
-                xbmcHandler.xbmcSyncMain(Receiver.rcvXLST(szMSG, UID, szListPath), UID);
+                xbmcHandler.xbmcSyncMain(Receiver.rcvXLST(szMSG, UID, Operator.szCliFileListFolder), UID);
             }
             
             if (szMSG[2].equals("REQXLST")) {

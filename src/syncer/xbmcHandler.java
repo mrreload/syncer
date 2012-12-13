@@ -53,7 +53,7 @@ public class xbmcHandler {
                     + "left join files on movie.idfile = files.idfile "
                     + "left join path on files.idPath = path.idPath "
                     + "left join streamdetails on movie.idfile = streamdetails.idfile and streamdetails.iVideoWidth is not null "
-                    + "order by movie.idfile desc limit 1;");
+                    + "order by movie.idfile;");
             rs = pst.executeQuery();
 
             while (rs.next()) {
@@ -126,8 +126,8 @@ public class xbmcHandler {
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
-                    csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
                     Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,0");
+                    csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
                 }
 
             }

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,9 +36,11 @@ public class Operator {
     static Map<String, String> XbmcREQSent;
     public final static Logger opLOG = Logger.getLogger(Operator.class.getName());
     public static String szREQlogfolderXBMC;
+    public static String szCliFileListFolder;
     public static String szREQlogfolderFILE;
     private static StandardCopyOption overWrite = StandardCopyOption.REPLACE_EXISTING;
     private static StandardCopyOption atomicMove = StandardCopyOption.ATOMIC_MOVE;
+    
 
     Operator() {
         Q = new LinkedBlockingQueue<>();
@@ -46,11 +49,12 @@ public class Operator {
         Inprocess = Collections.synchronizedMap(new HashMap<String, String>());
         XbmcREQSent = Collections.synchronizedMap(new HashMap<String, String>());
         szREQlogfolderXBMC = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc" + File.separatorChar;
-        szREQlogfolderXBMC = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "file" + File.separatorChar;
+        szREQlogfolderFILE = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "file" + File.separatorChar;
+        szCliFileListFolder = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc-client" + File.separatorChar;
     }
 
     private static void Ops() {
-
+//System.out.println("Config file at: " + Config.cfgFile);
         if (Config.readProp("file.sync", Config.cfgFile).equalsIgnoreCase("true")) {
 //            String cliFile = szREQlogfolderFILE + Clients.get(client) + ".txt";
             // file sync ops here
@@ -63,14 +67,19 @@ public class Operator {
                 String client[] = Config.readProp("sync.partners.xbmc.csv", Config.cfgFile).split(",");
                 // find if configured clients are connected and do work
                 System.out.println("Checking for connected Clients for Operator to start work");
+                
                 for (int c = 0; c < client.length; c++) {
-                    System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
-                    if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
-                        worker(client[c]);
-                    } else {
-                        Clients.remove(client[c]);
-                        ConnectionHandler.sockets.remove(Clients.get(client[c]));
+                    
+//                    System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
+                    if (ConnectionHandler.sockets.get(Clients.get(client[c])) != null) {
+                        if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
+                            worker(client[c]);
+                        } else {
+                            Clients.remove(client[c]);
+                            ConnectionHandler.sockets.remove(Clients.get(client[c]));
+                        }
                     }
+
                 }
                 try {
                     Thread.sleep(1000);
@@ -92,19 +101,21 @@ public class Operator {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Operator.class.getName()).log(Level.SEVERE, null, ex);
+                        opLOG.severe(ex.getMessage());
                     }
                 }
             }
         }).start();
         System.out.println("Client watcher started....");
+        opLOG.info("Client watcher started....");
     }
 
     static void worker(String client) {
         // look for unfinished work for connected node(s) and request remaining files
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
         if (new File(cliFile).exists()) {
-            InitSort(cliFile);
+            opLOG.info("Sorting through existing sent requests");
+            InitSort(cliFile, client, "xbmc");
         }
         if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
 
@@ -121,14 +132,15 @@ public class Operator {
 
     }
 
-    public static void InitSort(final String szLOG) {
+    public static void InitSort(final String szLogOfReq, final String szClient, final String szType) {
 
         new Thread(new Runnable() {
             public void run() {
 
                 while (true) {
                     try {
-                        WatchNsort(FinishedFilesQ.take(), szLOG);
+                        //take file String from Q 
+                        WatchNsort(FinishedFilesQ.take(), szLogOfReq, szClient, szType);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Operator.class.getName()).log(Level.SEVERE, null, ex);
                     }
@@ -141,13 +153,33 @@ public class Operator {
             }
         }).start();
         System.out.println("Complete files Q started....");
+        opLOG.info("Complete files Q started....");
     }
 
-    static void WatchNsort(String szFile, String szLOG) {
+    static void WatchNsort(String szFile, String szReqLog, String szClient, String szType) {
         //read requested files log for sort decision
-        GetOutPutPath(szLOG, szFile);
-        nioMove(szFile, "outputfile");
-        xbmcHandler.removeLineFromFile(szFile, szLOG);
+        String[] strInfo = GetOutPutPath(szReqLog, szFile);
+        
+        String mTitle = strInfo[1];
+        String mYear = strInfo[2];
+        String mPath = strInfo[4];
+        String mImDb = strInfo[3];
+        String mQual = strInfo[5];
+        String szOutFile = null;
+        
+        String szOutFolder = Config.readProp("local.archive.point", Config.cfgFile) + File.separatorChar + szType + File.separatorChar + szClient + File.separatorChar;
+        if (szType.equalsIgnoreCase("xbmc")) {
+            szOutFolder = szOutFolder + "\'" + mTitle + "\' (" + mYear + ")";
+            if (!new File(szOutFolder).exists()) {
+                new File(szOutFolder).mkdirs();
+            }
+            szOutFile = szOutFolder + File.separatorChar + (new File(mPath).getName());
+        } else if (szType.equalsIgnoreCase("file")) {
+            System.out.println("File Sync not implemented...yet");
+            //szOutFile = szOutFolder + szFile;
+        }
+        nioMove(szFile, szOutFile);
+        xbmcHandler.removeLineFromFile(szFile, szReqLog);
 
     }
 
@@ -174,7 +206,7 @@ public class Operator {
             }
             //Close the input stream
             in.close();
-            System.out.println("Done Reading and querying");
+            
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }

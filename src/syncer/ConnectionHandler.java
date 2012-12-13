@@ -17,8 +17,8 @@ import java.util.Map;
 public class ConnectionHandler extends Thread {
 
     Socket conn = new Socket();
-    static Map<String, Socket> sockets = Collections.synchronizedMap(new HashMap<String, Socket>());
-    static Map<String, InputStream> inStreams = Collections.synchronizedMap(new HashMap<String, InputStream>());
+    public static Map<String, Socket> sockets;
+    public static Map<String, InputStream> inStreams;
 //    static Map<String, String> client2UID = Collections.synchronizedMap(new HashMap<String, String>());
     final String separ = ",,";
     String[] szElements;
@@ -26,7 +26,8 @@ public class ConnectionHandler extends Thread {
 
     ConnectionHandler(Socket socket) {
         conn = socket;
-        
+        sockets = Collections.synchronizedMap(new HashMap<String, Socket>());
+        inStreams = Collections.synchronizedMap(new HashMap<String, InputStream>());
     }
 
     public void run() {
