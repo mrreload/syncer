@@ -4,9 +4,7 @@
  */
 package syncer;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 /**
@@ -20,12 +18,12 @@ public class Syncer {
      */
     public final static Logger mainLOG = Logger.getLogger(Syncer.class.getName());
     static String szFile = "/home/xbmc/test/hsqldb-2.2.8.zip";
-    static String szFile2 = "C:" + File.separatorChar + "temp";
+//    static String szFile2 = "C:" + File.separatorChar + "temp";
     static String szFile3 = "/home/media/test/test.zip";
 
     public static void main(String[] args) throws IOException, InterruptedException {
         //Config.cfgFile = "syncer.conf";
-        WatchDir.Watcher(szFile2);
+//        WatchDir.Watcher(szFile2);
         Config.setHome();
         Config.checkDefaults();
         if (args.length > 0) {
@@ -36,20 +34,20 @@ public class Syncer {
         LogMan.setup();
         Sender sendQ = new Sender();
         Operator op = new Operator();
-        Sender.Qwatcher();
-        Operator.Clientwatcher();
+        sendQ.Qwatcher();
+        op.Clientwatcher();
         if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("master")) {
 
             try {
                 Master.Listen(Integer.parseInt(Config.readProp("local.port", Config.cfgFile)));
-                TimeUnit.SECONDS.sleep(1);
+//                TimeUnit.SECONDS.sleep(1);
 
             } catch (IOException ex) {
                 mainLOG.severe(ex.getMessage());
             }
 
         } else if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("node")) {
-            mainLOG.info("Starting Node");
+            mainLOG.info("Starting Node " + Config.readProp("remote.host", Config.cfgFile) + Integer.parseInt(Config.readProp("remote.port", Config.cfgFile)));
             Node.connect(Config.readProp("remote.host", Config.cfgFile), Integer.parseInt(Config.readProp("remote.port", Config.cfgFile)));
 
 //            TimeUnit.SECONDS.sleep(3);

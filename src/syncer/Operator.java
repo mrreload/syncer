@@ -62,6 +62,7 @@ public class Operator {
             while (Config.readProp("sync.partners.xbmc.csv", Config.cfgFile) != null && !Clients.isEmpty()) {
                 String client[] = Config.readProp("sync.partners.xbmc.csv", Config.cfgFile).split(",");
                 // find if configured clients are connected and do work
+                System.out.println("Checking for connected Clients for Operator to start work");
                 for (int c = 0; c < client.length; c++) {
                     System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
                     if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
@@ -81,7 +82,7 @@ public class Operator {
         }
     }
 
-    static void Clientwatcher() {
+    void Clientwatcher() {
 
         new Thread(new Runnable() {
             public void run() {

@@ -128,7 +128,7 @@ public class Sender {
 //        }
 //
 //    }
-    static void Qwatcher() {
+    void Qwatcher() {
         
         new Thread(new Runnable() {
             public void run() {
