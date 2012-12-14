@@ -28,7 +28,7 @@ public class SplitMan {
             String fileName;
             String szOutFile;
             ArrayList<String> alFiles = new ArrayList<>();
-            int size = 1024 * 1024 * 5;
+            int size = 1024 * 1024;
             byte buffer[] = new byte[size];
 
             int count = 0;

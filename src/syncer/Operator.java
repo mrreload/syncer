@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class Operator {
     public static String szREQlogfolderFILE;
     private static StandardCopyOption overWrite = StandardCopyOption.REPLACE_EXISTING;
     private static StandardCopyOption atomicMove = StandardCopyOption.ATOMIC_MOVE;
+    static ArrayList<String[]> alREQ;
     
 
     Operator() {
@@ -51,10 +53,16 @@ public class Operator {
         szREQlogfolderXBMC = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc" + File.separatorChar;
         szREQlogfolderFILE = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "file" + File.separatorChar;
         szCliFileListFolder = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc-client" + File.separatorChar;
+        alREQ = new ArrayList<>();
     }
 
-    private static void Ops() {
-//System.out.println("Config file at: " + Config.cfgFile);
+    private static void Ops(){
+        try {
+            //System.out.println("Config file at: " + Config.cfgFile);
+                    Thread.sleep(500);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Operator.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (Config.readProp("file.sync", Config.cfgFile).equalsIgnoreCase("true")) {
 //            String cliFile = szREQlogfolderFILE + Clients.get(client) + ".txt";
             // file sync ops here
