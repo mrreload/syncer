@@ -47,13 +47,26 @@ public class xbmcHandler {
         try {
 
             con = (Connection) DriverManager.getConnection(url, dbuser, dbpass);
-            pst = con.prepareStatement("SELECT movie.idFile, movie.c00 as Title, movie.c07 as Year, "
-                    + "movie.c09 as imdb_id, concat(path.strPath, files.strFilename) "
-                    + "as fullpath, streamdetails.iVideoWidth as videoQ FROM movie "
-                    + "left join files on movie.idfile = files.idfile "
-                    + "left join path on files.idPath = path.idPath "
-                    + "left join streamdetails on movie.idfile = streamdetails.idfile and streamdetails.iVideoWidth is not null "
-                    + "order by movie.idfile;");
+            pst = con.prepareStatement("SELECT  movie.idFile, \n" +
+        "movie.c00 as Title,\n" +
+        "movie.c07 as Year, \n" +
+        "movie.c09 as imdb_id,\n" +
+        "concat(path.strPath, files.strFilename) as fullpath,\n" +
+        "streamdetails.iVideoWidth as videoQ\n" +
+"FROM    movie\n" +
+"as      movie\n" +
+"left    outer join files\n" +
+"as      files\n" +
+"on      movie.idfile = files.idfile\n" + 
+"left    outer join path\n" +
+"as      path\n" + 
+"on      files.idPath = path.idPath\n" + 
+"left    join streamdetails\n" +
+"as      streamdetails\n" +
+"on      movie.idfile = streamdetails.idfile\n" + 
+"and     streamdetails.iVideoWidth is not null\n" +
+"where   movie.idMovie = '3980';");
+            System.out.println(pst);
             rs = pst.executeQuery();
 
             while (rs.next()) {

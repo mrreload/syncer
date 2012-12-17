@@ -32,6 +32,7 @@ public class Syncer {
             
         }
         LogMan.setup();
+        xbmcHandler.query("/home/xbmc/testexport.txt");
         Sender sendQ = new Sender();
         Operator op = new Operator();
         
