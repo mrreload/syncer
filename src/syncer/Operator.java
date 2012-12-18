@@ -10,7 +10,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,7 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -45,7 +43,8 @@ public class Operator {
     
 
     Operator() {
-        Q = new LinkedBlockingQueue<>();
+        opLOG.info("Starting Operator Queues and initializing Maps");
+        Q = new LinkedBlockingQueue<>(100);
         FinishedFilesQ = new LinkedBlockingQueue<>();
         Clients = Collections.synchronizedMap(new HashMap<String, String>());
         Inprocess = Collections.synchronizedMap(new HashMap<String, String>());
@@ -61,7 +60,7 @@ public class Operator {
             //System.out.println("Config file at: " + Config.cfgFile);
                     Thread.sleep(500);
         } catch (InterruptedException ex) {
-            Logger.getLogger(Operator.class.getName()).log(Level.SEVERE, null, ex);
+            opLOG.severe(ex.getMessage());
         }
         if (Config.readProp("file.sync", Config.cfgFile).equalsIgnoreCase("true")) {
 //            String cliFile = szREQlogfolderFILE + Clients.get(client) + ".txt";
@@ -74,6 +73,7 @@ public class Operator {
             while (Config.readProp("sync.partners.xbmc.csv", Config.cfgFile) != null && !Clients.isEmpty()) {
                 String client[] = Config.readProp("sync.partners.xbmc.csv", Config.cfgFile).split(",");
                 // find if configured clients are connected and do work
+                opLOG.info("Checking for connected Clients for Operator to start work");
                 System.out.println("Checking for connected Clients for Operator to start work");
                 
                 for (int c = 0; c < client.length; c++) {
@@ -150,12 +150,12 @@ public class Operator {
                         //take file String from Q 
                         WatchNsort(FinishedFilesQ.take(), szLogOfReq, szClient, szType);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Operator.class.getName()).log(Level.SEVERE, null, ex);
+                        opLOG.severe(ex.getMessage());
                     }
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Operator.class.getName()).log(Level.SEVERE, null, ex);
+                        opLOG.severe(ex.getMessage());
                     }
                 }
             }
@@ -186,7 +186,9 @@ public class Operator {
             System.out.println("File Sync not implemented...yet");
             //szOutFile = szOutFolder + szFile;
         }
+        opLOG.info("Moving: " + szFile + " to: " + szOutFile);
         nioMove(szFile, szOutFile);
+        opLOG.info("Removing line: " + szFile + " from: " + szReqLog);
         xbmcHandler.removeLineFromFile(szFile, szReqLog);
 
     }
@@ -231,9 +233,9 @@ public class Operator {
                 Files.createDirectory(targetPath);
             }
             Files.move(source, destination, overWrite, atomicMove);
-//            cpLOG.info("File Moved to:  " + szdstFile);
+            opLOG.info("File Moved to:  " + szdstFile);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            opLOG.info(ex.getMessage());
         }
     }
 }

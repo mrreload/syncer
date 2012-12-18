@@ -29,18 +29,21 @@ public class Syncer {
         if (args.length > 0) {
             Config.cfgFile = args[0];
             //szFile = args[1];
-            
+
         }
         LogMan.setup();
-        xbmcHandler.query("/home/xbmc/testexport.txt");
+        //xbmcHandler.query("/home/xbmc/testexport.txt");
         Sender sendQ = new Sender();
         Operator op = new Operator();
-        
+        Request req = new Request();
+        req.BufferLimit();
         sendQ.Qwatcher();
         op.Clientwatcher();
+        
         if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("master")) {
 
             try {
+                mainLOG.info("Starting Master " + Config.readProp("local.port", Config.cfgFile));
                 Master.Listen(Integer.parseInt(Config.readProp("local.port", Config.cfgFile)));
 //                TimeUnit.SECONDS.sleep(1);
 
@@ -52,16 +55,7 @@ public class Syncer {
             mainLOG.info("Starting Node " + Config.readProp("remote.host", Config.cfgFile) + Integer.parseInt(Config.readProp("remote.port", Config.cfgFile)));
             Node.connect(Config.readProp("remote.host", Config.cfgFile), Integer.parseInt(Config.readProp("remote.port", Config.cfgFile)));
 
-//            TimeUnit.SECONDS.sleep(3);
-//            Sender.putQ(Config.readProp("marctv", Config.cfgFile), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
-//            Sender.putQ(Config.readProp("dummy", Config.cfgFile), "ACK,," + Config.readProp("local.name", Config.cfgFile));
-
-
-//            Sender.SndMSG(Node.myUid + ",,REQ,," + szFile + ",,0", Node.nodeLocalSocket);
         }
-//        TimeUnit.SECONDS.sleep(2);
-//        
-//System.out.println("Got from HashMap " + ConnectionHandler.client2UID.get("marctv"));
-//        Sender.connect(Config.readProp("remote.host", "syncer.conf"), Integer.parseInt(Config.readProp("remote.port", "syncer.conf")));
+
     }
 }

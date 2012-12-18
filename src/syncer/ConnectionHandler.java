@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  *
@@ -23,8 +24,10 @@ public class ConnectionHandler extends Thread {
     final String separ = ",,";
     String[] szElements;
     static String uid;
+    public final static Logger chLOG = Logger.getLogger(ConnectionHandler.class.getName());
 
     ConnectionHandler(Socket socket) {
+        chLOG.info("Connection Handler Initializing");
         conn = socket;
         sockets = Collections.synchronizedMap(new HashMap<String, Socket>());
         inStreams = Collections.synchronizedMap(new HashMap<String, InputStream>());
@@ -34,7 +37,7 @@ public class ConnectionHandler extends Thread {
 
         try {
             if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("master")) {
-                
+
                 Master.MasterMain(conn);
 
 
@@ -44,7 +47,7 @@ public class ConnectionHandler extends Thread {
             }
         }//try
         catch (Exception e) {
-            e.printStackTrace();
+            chLOG.severe(e.getMessage());
         }
     }
 }//class connedtion

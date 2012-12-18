@@ -10,7 +10,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -63,6 +62,7 @@ public class Receiver {
             String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
             OutputStream output = new FileOutputStream(szCurrentChunk);
             long size = clientData.readLong();
+            rcvLOG.info("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk);
             System.out.println("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk);
             byte[] buffer = new byte[1024];
             while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
@@ -80,6 +80,7 @@ public class Receiver {
             } else {
                 //add logic to re-send corrupt chunk
                 System.out.println("Chunk is BAD!");
+                rcvLOG.warning("Chunk is BAD!");
                 badFiles.ensureCapacity(index);
                 badFiles.add(szFileInfo);
 
@@ -149,6 +150,7 @@ public class Receiver {
                 }
 
                 szOutFileFinal = szOutFolder + File.separatorChar + (new File(szOrgFileName).getName());
+                rcvLOG.info("Assembling: " + szOutFileFinal);
                 SplitMan.FileJoiner(szFileList, szOutFileFinal);
                 //                    System.out.println("Back to Listen");
             } catch (Exception ex) {
@@ -157,6 +159,7 @@ public class Receiver {
             if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
                 try {
                     System.out.println("CheckSums match");
+                    rcvLOG.info("CheckSums match, file good: " + szOutFileFinal);
                     Operator.FinishedFilesQ.put(szOutFileFinal);
                     blComplete = true;
 
@@ -181,6 +184,7 @@ public class Receiver {
     public static String rcvXLST(String[] szFileInfo, String UID, String szFilePath) {
 
         System.out.println("Receiving XLST length: " + szFileInfo.length);
+        rcvLOG.info("Receiving XLST length: " + szFileInfo.length);
         int bytesRead;
         String szFullFilePath = null;
         boolean blReceive = true;
@@ -204,6 +208,7 @@ public class Receiver {
                 OutputStream output = new FileOutputStream(szFullFilePath);
                 long size = clientData.readLong();
                 System.out.println("Receiving: " + szFullFilePath + " Size: " + size + " SHA256: " + szSHA);
+                rcvLOG.info("Receiving: " + szFullFilePath + " Size: " + size + " SHA256: " + szSHA);
                 byte[] buffer = new byte[1024];
                 while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
                     output.write(buffer, 0, bytesRead);
@@ -214,6 +219,7 @@ public class Receiver {
                 output.close();
 
                 System.out.println("Done receiving XBMC db export from: " + szFileInfo[1]);
+                rcvLOG.info("Done receiving XBMC db export from: " + szFileInfo[1]);
                 blReceive = false;
             } catch (IOException ex) {
                 rcvLOG.severe(ex.getMessage());

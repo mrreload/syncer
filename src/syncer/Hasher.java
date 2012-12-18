@@ -12,7 +12,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Hasher {
-
+public final static Logger hsLOG = Logger.getLogger(Hasher.class.getName());
     public static String getSHA(String szFileIn) {
         StringBuilder sb = null;
         FileInputStream fis = null;
@@ -34,14 +34,14 @@ public class Hasher {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(Hasher.class.getName()).log(Level.SEVERE, null, ex);
+            hsLOG.severe(ex.getMessage());
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(Hasher.class.getName()).log(Level.SEVERE, null, ex);
+            hsLOG.severe(ex.getMessage());
         } finally {
             try {
                 fis.close();
             } catch (IOException ex) {
-                Logger.getLogger(Hasher.class.getName()).log(Level.SEVERE, null, ex);
+                hsLOG.severe(ex.getMessage());
             }
         }
         return sb.toString();

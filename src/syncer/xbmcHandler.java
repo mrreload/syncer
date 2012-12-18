@@ -29,6 +29,8 @@ import java.util.logging.Logger;
  */
 public class xbmcHandler {
 
+    public final static Logger xbmcLOG = Logger.getLogger(xbmcHandler.class.getName());
+
     public static void query(String szExport) {
         if (new File(szExport).exists()) {
             new File(szExport).delete();
@@ -47,26 +49,26 @@ public class xbmcHandler {
         try {
 
             con = (Connection) DriverManager.getConnection(url, dbuser, dbpass);
-            pst = con.prepareStatement("SELECT  movie.idFile, \n" +
-        "movie.c00 as Title,\n" +
-        "movie.c07 as Year, \n" +
-        "movie.c09 as imdb_id,\n" +
-        "concat(path.strPath, files.strFilename) as fullpath,\n" +
-        "streamdetails.iVideoWidth as videoQ\n" +
-"FROM    movie\n" +
-"as      movie\n" +
-"left    outer join files\n" +
-"as      files\n" +
-"on      movie.idfile = files.idfile\n" + 
-"left    outer join path\n" +
-"as      path\n" + 
-"on      files.idPath = path.idPath\n" + 
-"left    join streamdetails\n" +
-"as      streamdetails\n" +
-"on      movie.idfile = streamdetails.idfile\n" + 
-"and     streamdetails.iVideoWidth is not null\n" +
-"where   movie.idMovie = '3980';");
-            System.out.println(pst);
+            pst = con.prepareStatement("SELECT  movie.idFile, \n"
+                    + "movie.c00 as Title,\n"
+                    + "movie.c07 as Year, \n"
+                    + "movie.c09 as imdb_id,\n"
+                    + "concat(path.strPath, files.strFilename) as fullpath,\n"
+                    + "streamdetails.iVideoWidth as videoQ\n"
+                    + "FROM    movie\n"
+                    + "as      movie\n"
+                    + "left    outer join files\n"
+                    + "as      files\n"
+                    + "on      movie.idfile = files.idfile\n"
+                    + "left    outer join path\n"
+                    + "as      path\n"
+                    + "on      files.idPath = path.idPath\n"
+                    + "left    join streamdetails\n"
+                    + "as      streamdetails\n"
+                    + "on      movie.idfile = streamdetails.idfile\n"
+                    + "and     streamdetails.iVideoWidth is not null;");
+//                    + "where   movie.idMovie = '3980';");
+//            System.out.println(pst);
             rs = pst.executeQuery();
 
             while (rs.next()) {
@@ -74,8 +76,8 @@ public class xbmcHandler {
                 csvWrite(rs.getInt("idFile") + "\t" + rs.getString("Title") + "\t" + rs.getString("Year") + "\t" + rs.getString("imdb_id") + "\t" + rs.getString("fullpath") + "\t" + rs.getString("videoQ"), szExport);
             }
         } catch (SQLException ex) {
-            Logger lgr = Logger.getLogger(xbmcHandler.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
+            xbmcLOG.severe(ex.getMessage());
+            xbmcLOG.severe(ex.getSQLState());
 
         } finally {
 
@@ -88,8 +90,8 @@ public class xbmcHandler {
                 }
 
             } catch (SQLException ex) {
-                Logger lgr = Logger.getLogger(xbmcHandler.class.getName());
-                lgr.log(Level.SEVERE, ex.getMessage(), ex);
+                xbmcLOG.severe(ex.getMessage());
+                xbmcLOG.severe(ex.getSQLState());
             }
         }
     }
@@ -103,7 +105,7 @@ public class xbmcHandler {
             bw.newLine();
             bw.close();;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            xbmcLOG.severe(ex.getMessage());
         }
     }
     private static String RemoteList;
@@ -136,6 +138,7 @@ public class xbmcHandler {
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
                     System.out.println("Not in local db " + lineArray[3]);
+                    xbmcLOG.info("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
@@ -146,9 +149,10 @@ public class xbmcHandler {
             }
             //Close the input stream
             in.close();
+            xbmcLOG.info("Done Reading and querying");
             System.out.println("Done Reading and querying");
         } catch (Exception e) {//Catch exception if any
-            System.err.println("Error: " + e.getMessage());
+            xbmcLOG.severe(e.getMessage());
         }
     }
 
@@ -172,9 +176,8 @@ public class xbmcHandler {
 
             blInDb = rs.next();
         } catch (SQLException ex) {
-            Logger lgr = Logger.getLogger(xbmcHandler.class.getName());
-            lgr.log(Level.SEVERE, ex.getMessage(), ex);
-
+            xbmcLOG.severe(ex.getMessage());
+            xbmcLOG.severe(ex.getSQLState());
         } finally {
 
             try {
@@ -186,8 +189,8 @@ public class xbmcHandler {
                 }
 
             } catch (SQLException ex) {
-                Logger lgr = Logger.getLogger(xbmcHandler.class.getName());
-                lgr.log(Level.SEVERE, ex.getMessage(), ex);
+                xbmcLOG.severe(ex.getMessage());
+                xbmcLOG.severe(ex.getSQLState());
             }
         }
         return blInDb;
@@ -209,6 +212,7 @@ public class xbmcHandler {
 //                System.out.println(strLine);
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
+                    xbmcLOG.info("Not in local db " + lineArray[3]);
                     System.out.println("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
@@ -222,7 +226,7 @@ public class xbmcHandler {
             in.close();
             System.out.println("Done Reading and querying");
         } catch (Exception e) {//Catch exception if any
-            System.err.println("Error: " + e.getMessage());
+            xbmcLOG.severe(e.getMessage());
         }
     }
 
@@ -234,6 +238,7 @@ public class xbmcHandler {
 
             if (!inFile.isFile()) {
                 System.out.println("Parameter is not an existing file");
+                xbmcLOG.warning(file + " Does not exist");
                 return;
             }
 
@@ -270,10 +275,9 @@ public class xbmcHandler {
             }
 
         } catch (FileNotFoundException ex) {
-            ex.printStackTrace();
+            xbmcLOG.severe(ex.getMessage());
         } catch (IOException ex) {
-            ex.printStackTrace();
+            xbmcLOG.severe(ex.getMessage());
         }
     }
-
 }
