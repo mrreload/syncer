@@ -20,7 +20,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -66,7 +65,7 @@ public class xbmcHandler {
                     + "left    join streamdetails\n"
                     + "as      streamdetails\n"
                     + "on      movie.idfile = streamdetails.idfile\n"
-                    + "and     streamdetails.iVideoWidth is not null;");
+                    + "where     streamdetails.iVideoWidth is not null;");
 //                    + "where   movie.idMovie = '3980';");
 //            System.out.println(pst);
             rs = pst.executeQuery();
@@ -108,15 +107,15 @@ public class xbmcHandler {
             xbmcLOG.severe(ex.getMessage());
         }
     }
-    private static String RemoteList;
-    private static String RemoteUID;
+//    private static String RemoteList;
+//    private static String RemoteUID;
 
-    public static void xbmcSyncMain(String szXList, String szRemoteUID) {
-        RemoteList = szXList;
-        RemoteUID = szRemoteUID;
+    public static void xbmcSyncMain(final String szXList, final String szRemoteUID) {
+//        RemoteList = szXList;
+//        RemoteUID = szRemoteUID;
         new Thread(new Runnable() {
             public void run() {
-                xbmcSync(RemoteList, RemoteUID);
+                xbmcSync(szXList, szRemoteUID);
             }
         }).start();
     }
@@ -143,6 +142,8 @@ public class xbmcHandler {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
                     Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,0");
+                    
+                   // Log sent requests
                     csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
                 }
 

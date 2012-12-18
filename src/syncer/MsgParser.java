@@ -5,7 +5,6 @@
 package syncer;
 
 import java.io.File;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -15,7 +14,7 @@ import java.util.logging.Logger;
 public class MsgParser {
 
     final static String sep = ",,";
-    public final static Logger msgLOG = Logger.getLogger(Syncer.class.getName());
+    public final static Logger msgLOG = Logger.getLogger(MsgParser.class.getName());
 
     static void parseMSG(String[] szMSG) {
 //        System.out.println("Message objects:" + szMSG.length);

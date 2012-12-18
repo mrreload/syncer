@@ -121,6 +121,7 @@ public class Operator {
     static void worker(String client) {
         // look for unfinished work for connected node(s) and request remaining files
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
+        opLOG.info("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
         if (new File(cliFile).exists()) {
             opLOG.info("Sorting through existing sent requests");
             InitSort(cliFile, client, "xbmc");
@@ -133,6 +134,7 @@ public class Operator {
             Inprocess.put(client, "true");
         } else {
             //otherwise request new list and sync
+            opLOG.info("Requesting new XBMC list");
             Sender.putmQ(Clients.get(client), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
             XbmcREQSent.put(client, "true");
         }

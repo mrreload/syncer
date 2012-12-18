@@ -26,7 +26,7 @@ public class Receiver {
     static int iCurrentChunk;
     static int iTotalChunk;
     static ArrayList<File> alFiles;
-    public final static Logger rcvLOG = Logger.getLogger(Syncer.class.getName());
+    public final static Logger rcvLOG = Logger.getLogger(Receiver.class.getName());
     static String[] badList;
     static boolean blGotAllChunks;
 
@@ -135,8 +135,7 @@ public class Receiver {
         if ((iCurrentChunk == iTotalChunk) && iTotalChunk != 0 && iCurrentChunk > 0) {
             blGotAllChunks = true;
             System.out.println("Assembling");
-//            new Thread(new Runnable() {
-//                public void run() {
+
 
             String szOutFileFinal = null;
             File[] szFileList = null;
@@ -165,7 +164,7 @@ public class Receiver {
 
                     szFileList = null;
 
-    //                            Sender.SndMSG("COMPLETE", RemoteUID);
+    
                 } catch (InterruptedException ex) {
                     rcvLOG.severe(ex.getMessage());
                 }
