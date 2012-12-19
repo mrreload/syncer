@@ -40,7 +40,6 @@ public class Operator {
     private static StandardCopyOption overWrite = StandardCopyOption.REPLACE_EXISTING;
     private static StandardCopyOption atomicMove = StandardCopyOption.ATOMIC_MOVE;
     static ArrayList<String[]> alREQ;
-    
 
     Operator() {
         opLOG.info("Starting Operator Queues and initializing Maps");
@@ -55,10 +54,10 @@ public class Operator {
         alREQ = new ArrayList<>();
     }
 
-    private static void Ops(){
+    private static void Ops() {
         try {
             //System.out.println("Config file at: " + Config.cfgFile);
-                    Thread.sleep(500);
+            Thread.sleep(500);
         } catch (InterruptedException ex) {
             opLOG.severe(ex.getMessage());
         }
@@ -75,9 +74,9 @@ public class Operator {
                 // find if configured clients are connected and do work
                 opLOG.info("Checking for connected Clients for Operator to start work");
                 System.out.println("Checking for connected Clients for Operator to start work");
-                
+
                 for (int c = 0; c < client.length; c++) {
-                    
+
 //                    System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
                     if (ConnectionHandler.sockets.get(Clients.get(client[c])) != null) {
                         if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
@@ -87,7 +86,6 @@ public class Operator {
                             ConnectionHandler.sockets.remove(Clients.get(client[c]));
                         }
                     }
-
                 }
                 try {
                     Thread.sleep(1000);
@@ -95,7 +93,6 @@ public class Operator {
                     opLOG.severe(ex.getMessage());
                 }
             }
-
         }
     }
 
@@ -122,24 +119,22 @@ public class Operator {
         // look for unfinished work for connected node(s) and request remaining files
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
         opLOG.info("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
-        if (new File(cliFile).exists()) {
-            opLOG.info("Sorting through existing sent requests");
-            InitSort(cliFile, client, "xbmc");
-        }
-        if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
-
+        if (new File(cliFile).exists() && Inprocess.containsKey(client)) {
+            opLOG.info("Doing nothing for list, it's already being processed " + client);
+            
+        } else if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
+            opLOG.info("Starting new sorter because it's not already being processed for " + client);
             //read file and send requests
             xbmcHandler.ReadFile(cliFile, Clients.get(client));
             //let system know file is being processed
             Inprocess.put(client, "true");
+            InitSort(cliFile, client, "xbmc");
         } else {
             //otherwise request new list and sync
             opLOG.info("Requesting new XBMC list");
             Sender.putmQ(Clients.get(client), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
             XbmcREQSent.put(client, "true");
         }
-
-
     }
 
     public static void InitSort(final String szLogOfReq, final String szClient, final String szType) {
@@ -169,14 +164,14 @@ public class Operator {
     static void WatchNsort(String szFile, String szReqLog, String szClient, String szType) {
         //read requested files log for sort decision
         String[] strInfo = GetOutPutPath(szReqLog, szFile);
-        
+        opLOG.info("Sorting files recieved");
         String mTitle = strInfo[1];
         String mYear = strInfo[2];
         String mPath = strInfo[4];
         String mImDb = strInfo[3];
         String mQual = strInfo[5];
         String szOutFile = null;
-        
+
         String szOutFolder = Config.readProp("local.archive.point", Config.cfgFile) + File.separatorChar + szType + File.separatorChar + szClient + File.separatorChar;
         if (szType.equalsIgnoreCase("xbmc")) {
             szOutFolder = szOutFolder + "\'" + mTitle + "\' (" + mYear + ")";
@@ -218,7 +213,7 @@ public class Operator {
             }
             //Close the input stream
             in.close();
-            
+
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
