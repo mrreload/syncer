@@ -41,9 +41,9 @@ public class Request {
 //        String FileName = new File(szFile[3]).getName();
 
         CHUNK = szFile[4];
-        if (!CHUNK.equals("all")) {
-            reqChunk(szFile, UID);
-        }
+//        if (!CHUNK.equals("all")) {
+//            reqChunk(szFile, UID);
+//        }
 
 //        new Thread(new Runnable() {
 //            public void run() {

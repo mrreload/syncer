@@ -9,6 +9,7 @@ import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -42,6 +44,8 @@ public class Operator {
     private static StandardCopyOption overWrite = StandardCopyOption.REPLACE_EXISTING;
     private static StandardCopyOption atomicMove = StandardCopyOption.ATOMIC_MOVE;
     static ArrayList<String[]> alREQ;
+    static String sep = ",,";
+    static Map<String, String> Resuming;
 
     Operator() {
         opLOG.info("Starting Operator Queues and initializing Maps");
@@ -49,6 +53,7 @@ public class Operator {
         FinishedFilesQ = new LinkedBlockingQueue<>();
         Clients = Collections.synchronizedMap(new HashMap<String, String>());
         Inprocess = Collections.synchronizedMap(new HashMap<String, String>());
+        Resuming = Collections.synchronizedMap(new HashMap<String, String>());
         XbmcREQSent = Collections.synchronizedMap(new HashMap<String, String>());
         szREQlogfolderXBMC = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc" + File.separatorChar;
         szREQlogfolderFILE = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "file" + File.separatorChar;
@@ -82,6 +87,7 @@ public class Operator {
 //                    System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
                     if (ConnectionHandler.sockets.get(Clients.get(client[c])) != null) {
                         if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
+
                             worker(client[c]);
                         } else {
                             Clients.remove(client[c]);
@@ -121,10 +127,15 @@ public class Operator {
         // look for unfinished work for connected node(s) and request remaining files
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
         opLOG.fine("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
+        // checking for Files we need to resume first
+        opLOG.fine("Checking if there are files to resume");
+        Resumer(Clients.get(client));
+
         if (new File(cliFile).exists() && Inprocess.containsKey(client)) {
             opLOG.fine("Doing nothing for list, it's already being processed " + client);
-            
+
         } else if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
+
             opLOG.info("Starting new sorter because it's not already being processed for " + client);
             //read file and send requests
             xbmcHandler.ReadFile(cliFile, Clients.get(client));
@@ -237,6 +248,7 @@ public class Operator {
             opLOG.info(ex.getMessage());
         }
     }
+
     public static void csvWrite(String sztext, String szFile) {
         try {
             FileWriter fwrite = new FileWriter(szFile, true);
@@ -247,6 +259,50 @@ public class Operator {
             bw.close();;
         } catch (Exception ex) {
             opLOG.severe(ex.getMessage());
+        }
+
+    }
+
+    static void Resumer(String clientUID) {
+        if (!Resuming.containsKey(clientUID)) {
+            File file = new File(Config.getLogFolder() + File.separatorChar + clientUID);
+            File[] files = file.listFiles();
+            for (int fileInList = 0; fileInList < files.length; fileInList++) {
+                System.out.println(files[fileInList].toString());
+                ReadLastLine(files[fileInList].toString(), clientUID);
+            }
+        }
+        Resuming.put(clientUID, "true");
+    }
+
+    static void ReadLastLine(String szTlog, String szUID) {
+        String lineArray[] = new String[6];
+        FileInputStream in = null;
+        try {
+
+            in = new FileInputStream(szTlog);
+            BufferedReader br = new BufferedReader(new InputStreamReader(in));
+
+            String strLine = null;
+            String tmp = null;
+            while ((tmp = br.readLine()) != null) {
+                strLine = tmp;
+            }
+            String lastLine = strLine;
+            System.out.println(lastLine);
+            in.close();
+            lineArray = lastLine.split(sep);
+            Sender.putmQ(szUID, "REQ" + sep + lineArray[7] + sep + lineArray[4]);
+        } catch (FileNotFoundException ex) {
+            opLOG.severe(ex.getMessage());
+        } catch (IOException ex) {
+            opLOG.severe(ex.getMessage());
+        } finally {
+            try {
+                in.close();
+            } catch (IOException ex) {
+                opLOG.severe(ex.getMessage());
+            }
         }
     }
 }
