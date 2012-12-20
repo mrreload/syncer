@@ -5,9 +5,11 @@
 package syncer;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -72,8 +74,8 @@ public class Operator {
             while (Config.readProp("sync.partners.xbmc.csv", Config.cfgFile) != null && !Clients.isEmpty()) {
                 String client[] = Config.readProp("sync.partners.xbmc.csv", Config.cfgFile).split(",");
                 // find if configured clients are connected and do work
-                opLOG.info("Checking for connected Clients for Operator to start work");
-                System.out.println("Checking for connected Clients for Operator to start work");
+                opLOG.fine("Checking for connected Clients for Operator to start work");
+//                System.out.println("Checking for connected Clients for Operator to start work");
 
                 for (int c = 0; c < client.length; c++) {
 
@@ -118,9 +120,9 @@ public class Operator {
     static void worker(String client) {
         // look for unfinished work for connected node(s) and request remaining files
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
-        opLOG.info("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
+        opLOG.fine("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
         if (new File(cliFile).exists() && Inprocess.containsKey(client)) {
-            opLOG.info("Doing nothing for list, it's already being processed " + client);
+            opLOG.fine("Doing nothing for list, it's already being processed " + client);
             
         } else if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
             opLOG.info("Starting new sorter because it's not already being processed for " + client);
@@ -233,6 +235,18 @@ public class Operator {
             opLOG.info("File Moved to:  " + szdstFile);
         } catch (IOException ex) {
             opLOG.info(ex.getMessage());
+        }
+    }
+    public static void csvWrite(String sztext, String szFile) {
+        try {
+            FileWriter fwrite = new FileWriter(szFile, true);
+            BufferedWriter bw = new BufferedWriter(fwrite);
+//            System.out.println(sztext);
+            bw.write(sztext);
+            bw.newLine();
+            bw.close();;
+        } catch (Exception ex) {
+            opLOG.severe(ex.getMessage());
         }
     }
 }

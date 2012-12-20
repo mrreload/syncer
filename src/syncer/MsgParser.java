@@ -49,7 +49,7 @@ public class MsgParser {
                 System.out.println("COMPLETE Message received from Client " + szMSG[0]);
                 for (int i = 0; i < szMSG.length; i++) {
                 }
-                System.out.println("Deleting: " + Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
+//                System.out.println("Deleting: " + Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
                 msgLOG.info("Deleting: " + Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
                 CleanUp.deleteDir(Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
                 
@@ -60,7 +60,7 @@ public class MsgParser {
             }
 
             if (szMSG[2].equals("REQ")) {
-                System.out.println("Received a REQ from " + szMSG[0]);
+//                System.out.println("Received a REQ from " + szMSG[0]);
                 msgLOG.info("Received a REQ from " + szMSG[0]);
                 try {
 //                    Request.Qmsg(szMSG);
@@ -75,7 +75,7 @@ public class MsgParser {
                 for (int i = 0; i < szMSG.length; i++) {
                     fileREQ = fileREQ + " " + szMSG[i];
                 }
-                msgLOG.info("Receiving: " + fileREQ);
+                msgLOG.fine("Receiving: " + fileREQ);
                 Receiver.rcvFile2(szMSG, UID);
             }
             if (szMSG[2].equals("LST")) {
@@ -86,8 +86,8 @@ public class MsgParser {
             }
 
             if (szMSG[2].equals("XLST")) {
-                System.out.println("Received a XLST " + szMSG[0]);
-                msgLOG.info("Received a XLST " + szMSG[0]);
+//                System.out.println("Received a XLST " + szMSG[0]);
+//                msgLOG.info("Received a XLST " + szMSG[0]);
                 String fileREQ = "Receiving: ";
                 for (int i = 0; i < szMSG.length; i++) {
                     fileREQ = fileREQ + " " + szMSG[i];
@@ -98,7 +98,7 @@ public class MsgParser {
             }
 
             if (szMSG[2].equals("REQXLST")) {
-                System.out.println("Client requested xbmc list " + szMSG[0]);
+//                System.out.println("Client requested xbmc list " + szMSG[0]);
                 msgLOG.info("Client requested xbmc list " + szMSG[0]);
                 String fl2Send = Config.getLogFolder() + Config.readProp("local.name", Config.cfgFile) + ".txt";
                 if (new File(fl2Send).exists()) {
@@ -106,6 +106,7 @@ public class MsgParser {
                 }
                 try {
                     xbmcHandler.query(fl2Send);
+                    msgLOG.info("Sending XLST: " + fl2Send + " to " + szMSG[0]);
                     Sender.putmQ(szMSG[0], "XLST" + sep + fl2Send + sep + Hasher.getSHA(fl2Send));
                 } catch (Exception ex) {
                     msgLOG.severe(ex.getMessage());
@@ -113,7 +114,7 @@ public class MsgParser {
             }
 
         } else if (szMSG.length == 1) {
-            System.out.println("Message is 1 object" + szMSG[0]);
+            System.out.println("Warning Message is 1 object --ignoring" + szMSG[0]);
             msgLOG.warning("Message is 1 object " + szMSG[0]);
 
         }

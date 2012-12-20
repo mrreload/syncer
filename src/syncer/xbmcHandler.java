@@ -214,7 +214,7 @@ public class xbmcHandler {
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
                     xbmcLOG.info("Not in local db " + lineArray[3]);
-                    System.out.println("Not in local db " + lineArray[3]);
+//                    System.out.println("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
