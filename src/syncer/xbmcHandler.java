@@ -145,6 +145,7 @@ public class xbmcHandler {
                     
                    // Log sent requests
                     csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
+                    
                 }
 
             }
@@ -212,7 +213,7 @@ public class xbmcHandler {
                 // Print the content on the console
 //                System.out.println(strLine);
                 lineArray = strLine.split("\t");
-                if (!queryimdb(lineArray[3])) {
+                if (!queryimdb(lineArray[3]) && (!Operator.Resuming.get(szUID).equalsIgnoreCase(lineArray[4])) ) {
                     xbmcLOG.info("Not in local db " + lineArray[3]);
 //                    System.out.println("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {

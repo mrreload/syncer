@@ -6,7 +6,9 @@ package syncer;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.logging.Level;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -16,52 +18,67 @@ import java.util.logging.Logger;
 public class SplitMan {
 
     static String[] szFileList;
+    public final static Logger splitLOG = Logger.getLogger(SplitMan.class.getName());
 
-    public static String[] FileSplitter(String szFile, String szOutDir, String szHash) throws FileNotFoundException, IOException {
+    public static String[] FileSplitter(String szFile, String szOutDir, String szHash, String szStartChunk) {
         if (!new File(szOutDir).exists()) {
             new File(szOutDir).mkdirs();
         }
         if (!(calcSize(new File(szOutDir)) == new File(szFile).length())) {
-            System.out.println("Starting FileSplitter for: " + szFile);
-            FileInputStream fis = new FileInputStream(szFile);
-            String fileName;
-            String szOutFile;
-            ArrayList<String> alFiles = new ArrayList<>();
-            int size = 1024 * 1024;
-            byte buffer[] = new byte[size];
+            FileInputStream fis = null;
+            try {
+                splitLOG.info("Starting FileSplitter for: " + szFile);
+                fis = new FileInputStream(szFile);
+                String fileName;
+                String szOutFile;
+                ArrayList<String> alFiles = new ArrayList<>();
+                int size = 1024 * 1024;
+                byte buffer[] = new byte[size];
+                int count = 0;
+                while (true) {
 
-            int count = 0;
-            while (true) {
+                    int i = fis.read(buffer, 0, size);
+                    if (i == -1) {
+                        break;
+                    }
 
-                int i = fis.read(buffer, 0, size);
-                if (i == -1) {
-                    break;
+                    fileName = String.format("%s.part%09d", szFile, count);
+                    
+
+                    szOutFile = szOutDir + File.separatorChar + new File(fileName).getName();
+                    FileOutputStream fos = new FileOutputStream(szOutFile);
+                    fos.write(buffer, 0, i);
+                    fos.flush();
+                    fos.close();
+                    splitLOG.severe("Testing count against chunk#" + String.valueOf(count <= Integer.parseInt(szStartChunk)) + szStartChunk);
+                    if (count <= Integer.parseInt(szStartChunk)) {
+                        splitLOG.info("Adding " + count + " " + szOutFile + " to Outgoing Files list");
+                        alFiles.add(count, szOutFile);
+                    }
+
+                    ++count;
+
                 }
-//            Sender.senderBusy = true;
-                fileName = String.format("%s.part%09d", szFile, count);
-//            System.out.println(new File(fileName).getName());
-                szOutFile = szOutDir + File.separatorChar + new File(fileName).getName();
-                FileOutputStream fos = new FileOutputStream(szOutFile);
-                fos.write(buffer, 0, i);
-                fos.flush();
-                fos.close();
-//            System.out.println(szOutFile);
-                alFiles.add(count, szOutFile);
-                ++count;
+                szFileList = (String[]) alFiles.toArray(new String[0]);
 
+            } catch (FileNotFoundException ex) {
+                splitLOG.severe(ex.getMessage());
+            } catch (IOException ex) {
+                splitLOG.severe(ex.getMessage());
+            } finally {
+                try {
+                    fis.close();
+                } catch (IOException ex) {
+                    splitLOG.severe(ex.getMessage());
+                }
             }
-            szFileList = (String[]) alFiles.toArray(new String[0]);
-            System.out.println(count);
         } else {
-            szFileList = getList(szOutDir);
-//            for (int i = 0; i < szFileList.length; i++) {
-//                System.out.println(szFileList[i]);
-//            }
+            szFileList = getList(szOutDir, szStartChunk);
+            System.exit(99);
+
+
         }
 
-
-//        Sender.senderBusy = false;
-        
         return szFileList;
     }
 
@@ -69,8 +86,8 @@ public class SplitMan {
         try {
             // get number of files in temp folder
             //        System.out.println(new File(szDir).list().length);
-            System.out.println("OutPut to: " + szOutFile);
-            System.out.println("Joiner started..");
+            splitLOG.info("OutPut to: " + szOutFile);
+            splitLOG.info("Joiner started..");
 
             File ofile = new File(szOutFile);
             if (ofile.exists()) {
@@ -96,9 +113,9 @@ public class SplitMan {
             }
             fos.close();
             fos = null;
-            System.out.println("Joiner Ended..");
+            splitLOG.info("Joiner Ended for: " + szOutFile);
         } catch (IOException ex) {
-            Logger.getLogger(SplitMan.class.getName()).log(Level.SEVERE, null, ex);
+            splitLOG.severe(ex.getMessage());
         }
     }
 
@@ -114,17 +131,31 @@ public class SplitMan {
         return length;
     }
 
-    public static String[] getList(String szDir) {
+    public static String[] getList(String szDir, String szStartChunk) {
 
         File file = new File(szDir);
         File[] files = file.listFiles();
         String[] szFiles = new String[files.length];
+        String[] szCutList = null;
         for (int fileInList = 0; fileInList < files.length; fileInList++) {
 //            System.out.println(files[fileInList].toString());
+
             szFiles[fileInList] = files[fileInList].toString();
+
+
+        }
+        int iChunk = Integer.parseInt(szStartChunk);
+        if (iChunk != 0) {
+            for (int i = 0; i < iChunk - 1; i++) {
+                String str = Integer.toString(i);
+                String.format(".part%09d", str);
+                System.out.println(str);
+                //szCutList = removeElements(szFiles, Integer.toString(i));
+            }
+System.exit(98);
         }
 //        String[] szArray = Arrays.asList(files).toArray(new String[files.length]);
-        java.util.Arrays.sort(szFiles);
+        java.util.Arrays.sort(szCutList);
         return szFiles;
     }
 
@@ -145,5 +176,20 @@ public class SplitMan {
             }
         }
         return size;
+    }
+
+    public static String[] removeElements(String[] input, String deleteMe) {
+        if (input != null) {
+            List<String> list = new ArrayList<String>(Arrays.asList(input));
+            for (int i = 0; i < list.size(); i++) {
+                if (list.get(i).endsWith(deleteMe)) {
+                    System.out.println(deleteMe + " Removing item from list: " + list.get(i));
+                    list.remove(i);
+                }
+            }
+            return list.toArray(new String[0]);
+        } else {
+            return new String[0];
+        }
     }
 }

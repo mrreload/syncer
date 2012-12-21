@@ -36,7 +36,7 @@ public class Request {
         //REQ, FileName, chunk#
         sock = ConnectionHandler.sockets.get(UID);
         reqLOG.info(szFile[0] + " Client requested file: " + szFile[3] + " chunk: " + szFile[4]);
-        System.out.println(szFile[0] + " Client requested file: " + szFile[3] + " chunk: " + szFile[4]);
+//        System.out.println(szFile[0] + " Client requested file: " + szFile[3] + " chunk: " + szFile[4]);
         final String clientuuid = szFile[0];
 //        String FileName = new File(szFile[3]).getName();
 
@@ -52,8 +52,8 @@ public class Request {
 //                    Sender.OrgFileName = FILE;
             if (new File(szFile[3]).exists()) {
                 String fullHash = Hasher.getSHA(szFile[3]);
-                String[] szSnd = {clientuuid, "FIL", szFile[3], Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + fullHash, fullHash, new File(szFile[3]).getName(), fullHash};
-
+                String[] szSnd = {clientuuid, "FIL", szFile[3], Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + fullHash, fullHash, szFile[3], fullHash, szFile[4]};
+//              requestQ contents {0-clientuuid, 1-"FIL", 2-FullFilePath, 3-TempFolder to use, 4-fullHash, 5-ShortFileName, 6-fullHash, 7-Chunk# to start at
                 requestQ.put(szSnd);
 
             }
@@ -61,6 +61,7 @@ public class Request {
 
         } catch (Exception ex) {
             reqLOG.severe(ex.getMessage());
+            ex.printStackTrace();
         }
 
     }
@@ -86,23 +87,32 @@ public class Request {
 
                 while (true) {
                     try {
-
+//              requestQ contents {0-clientuuid, 1-"FIL", 2-FullFilePath, 3-TempFolder to use, 4-fullHash, 5-ShortFileName, 6-fullHash, 7-Chunk# to start at}
                         String szSnd[] = requestQ.take();
-                        Sender.SendList(szSnd[0], szSnd[1], SplitMan.FileSplitter(szSnd[2], szSnd[3], szSnd[4]), szSnd[5], szSnd[6]);
+//                        for (int i = 0; i < szSnd.length; i++) {
+//                            System.out.println(szSnd[i]);
+//                            
+//                        }
+//                        System.out.println("Request Q take count: " + szSnd.length);
+                        Sender.SendList(szSnd[0], szSnd[1], SplitMan.FileSplitter(szSnd[2], szSnd[3], szSnd[4], szSnd[7]), szSnd[5], szSnd[6]);
 
                     } catch (IOException ex) {
                         reqLOG.severe(ex.getMessage());
+                        ex.printStackTrace();
 
                     } catch (InterruptedException ex) {
                         reqLOG.severe(ex.getMessage());
+                        ex.printStackTrace();
 
                     } catch (Exception ex) {
                         reqLOG.severe(ex.getMessage());
+                        ex.printStackTrace();
                     }
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                         reqLOG.severe(ex.getMessage());
+                        ex.printStackTrace();
                     }
                 }
             }

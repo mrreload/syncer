@@ -119,7 +119,7 @@ public class Operator {
                 }
             }
         }).start();
-        System.out.println("Client watcher started....");
+//        System.out.println("Client watcher started....");
         opLOG.info("Client watcher started....");
     }
 
@@ -128,13 +128,10 @@ public class Operator {
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
         opLOG.fine("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
         // checking for Files we need to resume first
-        opLOG.fine("Checking if there are files to resume");
+        opLOG.info("Checking if there are files to resume");
         Resumer(Clients.get(client));
-
-        if (new File(cliFile).exists() && Inprocess.containsKey(client)) {
-            opLOG.fine("Doing nothing for list, it's already being processed " + client);
-
-        } else if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
+opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
+        if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
 
             opLOG.info("Starting new sorter because it's not already being processed for " + client);
             //read file and send requests
@@ -177,7 +174,7 @@ public class Operator {
     static void WatchNsort(String szFile, String szReqLog, String szClient, String szType) {
         //read requested files log for sort decision
         String[] strInfo = GetOutPutPath(szReqLog, szFile);
-        opLOG.info("Sorting files recieved");
+        opLOG.info("Sorting files received");
         String mTitle = strInfo[1];
         String mYear = strInfo[2];
         String mPath = strInfo[4];
@@ -266,13 +263,16 @@ public class Operator {
     static void Resumer(String clientUID) {
         if (!Resuming.containsKey(clientUID)) {
             File file = new File(Config.getLogFolder() + File.separatorChar + clientUID);
+            if (!file.exists()) {
+                file.mkdirs();
+            }
             File[] files = file.listFiles();
             for (int fileInList = 0; fileInList < files.length; fileInList++) {
                 System.out.println(files[fileInList].toString());
                 ReadLastLine(files[fileInList].toString(), clientUID);
             }
         }
-        Resuming.put(clientUID, "true");
+
     }
 
     static void ReadLastLine(String szTlog, String szUID) {
@@ -292,7 +292,13 @@ public class Operator {
             System.out.println(lastLine);
             in.close();
             lineArray = lastLine.split(sep);
+
             Sender.putmQ(szUID, "REQ" + sep + lineArray[7] + sep + lineArray[4]);
+            for (int i = 0; i < lineArray.length; i++) {
+                opLOG.severe("Last line: " + lineArray[i]);
+            }
+            Resuming.put(szUID, lineArray[7]);
+
         } catch (FileNotFoundException ex) {
             opLOG.severe(ex.getMessage());
         } catch (IOException ex) {

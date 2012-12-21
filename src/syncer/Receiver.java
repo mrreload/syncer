@@ -62,7 +62,7 @@ public class Receiver {
             String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
             OutputStream output = new FileOutputStream(szCurrentChunk);
             long size = clientData.readLong();
-            rcvLOG.info("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk + " of " + iTotalChunk);
+            rcvLOG.info("Receiving: " + szCurrentChunk + " Size: " + size + " Chunk#: " + iCurrentChunk + " of " + iTotalChunk);
 //            System.out.println("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk + " of " + iTotalChunk);
             byte[] buffer = new byte[1024];
             while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
@@ -74,7 +74,11 @@ public class Receiver {
             output.close();
             // Add file to received collection, must check for matching source file
             if (Receiver.verifyHash(szSHA, Hasher.getSHA(szCurrentChunk))) {
-                String transLog = Config.getLogFolder() + File.separatorChar + szFileInfo[0] + File.separatorChar + szSHAFull + ".txt";
+                String transLogFolder = Config.getLogFolder() + File.separatorChar + szFileInfo[0];
+                if (!new File(transLogFolder).exists()) {
+                    new File(transLogFolder).mkdirs();
+                }
+                String transLog = transLogFolder + File.separatorChar + szSHAFull + ".txt";
                 String sz2Write = (szFileInfo[0] + sep + szFileInfo[1] + sep + szFileInfo[2] + sep + szFileInfo[3] + sep + szFileInfo[4] + sep + szFileInfo[5] + sep + szFileInfo[6] + sep + szFileInfo[7]);
                 Operator.csvWrite(sz2Write, transLog);
                 alFiles.add(index, new File(szCurrentChunk));

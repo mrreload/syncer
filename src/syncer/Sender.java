@@ -74,6 +74,16 @@ public class Sender {
         //senderBusy = false;
 
     }
+    public static void putFileQ(String DestUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFileName, String szFullHash) {
+        String szMSG = szType + sep + szFile + sep + iCurrentFile + sep + iTotalFile + sep + szOrgFileName + sep + szFullHash;
+        String theMessage = Config.readProp("My.Uid", Config.cfgFile) + sep + DestUID + Request.sep + szMSG;
+//        System.out.println("Putting in Q: " + theMessage);
+        try {
+            Q.put(theMessage);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public static String[] getList(String szDir) {
 
@@ -183,16 +193,7 @@ public class Sender {
 
     }
 
-    public static void putFileQ(String DestUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFileName, String szFullHash) {
-        String szMSG = szType + sep + szFile + sep + iCurrentFile + sep + iTotalFile + sep + szOrgFileName + sep + szFullHash;
-        String theMessage = Config.readProp("My.Uid", Config.cfgFile) + Request.sep + DestUID + Request.sep + szMSG;
-//        System.out.println("Putting in Q: " + theMessage);
-        try {
-            Q.put(theMessage);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Sender.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
+    
 
     public static void SndXFile(String szUUID, String szType, String szFile) {
         FileInputStream fis = null;
