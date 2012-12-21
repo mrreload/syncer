@@ -67,13 +67,18 @@ public class Sender {
     }
 
     public static void SendList(String szUUID, String szType, String[] szList, String OrgFileName, String theHash) throws IOException, Exception {
-
+        
+        //get number of chunks by filename of last element in array
+        String[] szLastChunk = szList[szList.length -1].split(".part");
+        
         for (int i = 0; i < szList.length; i++) {
-            putFileQ(szUUID, szType, szList[i], i, szList.length, OrgFileName, theHash);
+            String[] chunkNum = szList[i].split(".part");
+            putFileQ(szUUID, szType, szList[i], Integer.parseInt(chunkNum[1]), Integer.parseInt(szLastChunk[1]), OrgFileName, theHash);
         }
         //senderBusy = false;
 
     }
+
     public static void putFileQ(String DestUID, String szType, String szFile, int iCurrentFile, int iTotalFile, String szOrgFileName, String szFullHash) {
         String szMSG = szType + sep + szFile + sep + iCurrentFile + sep + iTotalFile + sep + szOrgFileName + sep + szFullHash;
         String theMessage = Config.readProp("My.Uid", Config.cfgFile) + sep + DestUID + Request.sep + szMSG;
@@ -153,12 +158,12 @@ public class Sender {
             }
         }).start();
         sndLOG.info("Q watcher started....");
-        System.out.println("Q watcher started....");
+//        System.out.println("Q watcher started....");
     }
 
     public static void putmQ(String DestUID, String szMSG) {
         String theMessage = Config.readProp("My.Uid", Config.cfgFile) + sep + DestUID + sep + szMSG;
-        sndLOG.info("Putting in Q: " + theMessage);
+        sndLOG.fine("Putting in Q: " + theMessage);
 //        System.out.println("Putting in Q: " + theMessage);
         try {
             mQ.put(theMessage);
@@ -188,19 +193,17 @@ public class Sender {
             }
         } else {
             sndLOG.severe("Socket: " + szQmsg[1] + " not connected");
-            System.out.println("Socket not connected");
+//            System.out.println("Socket not connected");
         }
 
     }
-
-    
 
     public static void SndXFile(String szUUID, String szType, String szFile) {
         FileInputStream fis = null;
         try {
             String sep = ",,";
             sndLOG.info("Sending XLST " + szFile + " to " + szUUID);
-            System.out.println("Sending XLST " + szFile + " to " + szUUID);
+//            System.out.println("Sending XLST " + szFile + " to " + szUUID);
             Socket sock = ConnectionHandler.sockets.get(szUUID);
             File myFile = new File(szFile);
             String szSHA = Hasher.getSHA(szFile);

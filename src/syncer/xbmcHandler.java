@@ -141,7 +141,7 @@ public class xbmcHandler {
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
-                    Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,0");
+                    Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,000000000");
                     
                    // Log sent requests
                     csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
@@ -220,7 +220,7 @@ public class xbmcHandler {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
 
-                    Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,0");
+                    Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,000000000");
                 }
 
             }

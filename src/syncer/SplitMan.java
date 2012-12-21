@@ -50,9 +50,9 @@ public class SplitMan {
                     fos.write(buffer, 0, i);
                     fos.flush();
                     fos.close();
-                    splitLOG.severe("Testing count against chunk#" + String.valueOf(count <= Integer.parseInt(szStartChunk)) + szStartChunk);
-                    if (count <= Integer.parseInt(szStartChunk)) {
-                        splitLOG.info("Adding " + count + " " + szOutFile + " to Outgoing Files list");
+                    splitLOG.fine("Testing count against chunk#" + String.valueOf(count <= Integer.parseInt(szStartChunk)) + szStartChunk);
+                    if (count >= Integer.parseInt(szStartChunk)) {
+                        splitLOG.fine("Adding " + count + " " + szOutFile + " to Outgoing Files list");
                         alFiles.add(count, szOutFile);
                     }
 
