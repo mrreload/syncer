@@ -7,7 +7,7 @@ package syncer;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -43,7 +43,7 @@ public class SplitMan {
                     }
 
                     fileName = String.format("%s.part%09d", szFile, count);
-                    
+
 
                     szOutFile = szOutDir + File.separatorChar + new File(fileName).getName();
                     FileOutputStream fos = new FileOutputStream(szOutFile);
@@ -74,8 +74,6 @@ public class SplitMan {
             }
         } else {
             szFileList = getList(szOutDir, szStartChunk);
-            System.exit(99);
-
 
         }
 
@@ -132,31 +130,39 @@ public class SplitMan {
     }
 
     public static String[] getList(String szDir, String szStartChunk) {
-
+        List<String> list = new ArrayList<>();
         File file = new File(szDir);
         File[] files = file.listFiles();
-        String[] szFiles = new String[files.length];
+        java.util.Arrays.sort(files);
+//        String[] szFiles = new String[files.length];
         String[] szCutList = null;
-        for (int fileInList = 0; fileInList < files.length; fileInList++) {
+        int iChunk = Integer.parseInt(szStartChunk);
+        for (int fileInList = iChunk; fileInList < files.length; fileInList++) {
 //            System.out.println(files[fileInList].toString());
 
-            szFiles[fileInList] = files[fileInList].toString();
-
+//            szFiles[fileInList] = files[fileInList].toString();
+list.add(files[fileInList].toString());
 
         }
-        int iChunk = Integer.parseInt(szStartChunk);
-        if (iChunk != 0) {
-            for (int i = 0; i < iChunk - 1; i++) {
-                String str = Integer.toString(i);
-                String.format(".part%09d", str);
-                System.out.println(str);
-                //szCutList = removeElements(szFiles, Integer.toString(i));
-            }
-System.exit(98);
-        }
+        
+//        if (iChunk != 0) {
+//            for (int i = 0; i < iChunk; i++) {
+//                String str = String.format("%9s", Integer.toString(i)).replace(" ", "0");
+//                szCutList = removeElements(szFiles, str);
+//
+//            }
+//
+//        } else {
+//            list.add(szDir)
+//        }
+
 //        String[] szArray = Arrays.asList(files).toArray(new String[files.length]);
+        Collections.sort(list);
+        
+        szCutList = list.toArray(new String[0]);
         java.util.Arrays.sort(szCutList);
-        return szFiles;
+        
+        return szCutList;
     }
 
     private static long calcSize(File dir) {
@@ -180,13 +186,15 @@ System.exit(98);
 
     public static String[] removeElements(String[] input, String deleteMe) {
         if (input != null) {
-            List<String> list = new ArrayList<String>(Arrays.asList(input));
+            List<String> list = new ArrayList<>(Arrays.asList(input));
             for (int i = 0; i < list.size(); i++) {
                 if (list.get(i).endsWith(deleteMe)) {
-                    System.out.println(deleteMe + " Removing item from list: " + list.get(i));
+//                    System.out.println(deleteMe + " Removing item from list: " + list.get(i));
                     list.remove(i);
                 }
             }
+
+
             return list.toArray(new String[0]);
         } else {
             return new String[0];
