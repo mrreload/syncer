@@ -25,6 +25,7 @@ public class SplitMan {
             new File(szOutDir).mkdirs();
         }
         if (!(calcSize(new File(szOutDir)) == new File(szFile).length())) {
+            splitLOG.info("Folder size: " + calcSize(new File(szOutDir)) + " File size: " + new File(szFile).length());
             FileInputStream fis = null;
             try {
                 splitLOG.info("Starting FileSplitter for: " + szFile);

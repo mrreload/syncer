@@ -104,7 +104,19 @@ public class Receiver {
 //        }
 
         if (checkAndAssemble(UID, szOrgFileName, szSHAFull)) {
+            
             Sender.putmQ(UID, "COMPLETE" + sep + szSHAFull);
+            // check if File was requested from resumer or normal, Remove Map entries and File
+            if (Operator.Resuming.get(UID) != null) {
+                Operator.Resuming.remove(UID);
+                //remove from ReqLog
+                xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
+            }
+            if (Operator.Inprocess.get(szSHAFull) != null) {
+                Operator.Inprocess.remove(szSHAFull);
+                //remove from ReqLog
+                xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
+            }
             CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
         } else if (!blGotAllChunks) {
             //Do nothing just wait for rest of chunks. loop
@@ -142,10 +154,10 @@ public class Receiver {
                 System.out.println(badFiles.get(i));
             }
         }
-
+rcvLOG.info(szOrgFileName + " Not done yet ");
         if ((iCurrentChunk == iTotalChunk) && iTotalChunk != 0 && iCurrentChunk > 0) {
             blGotAllChunks = true;
-//            System.out.println("Assembling");
+rcvLOG.info("Assembling " + szOrgFileName);
 
 
             String szOutFileFinal = null;
@@ -164,6 +176,10 @@ public class Receiver {
                 String szOutFolder = Config.readProp("output.folder", Config.cfgFile);
                 if (!new File(szOutFolder).exists()) {
                     new File(szOutFolder).mkdirs();
+                }
+                System.out.println("Files to assemble");
+                for (int i = 0; i < szFileList.length; i++) {
+                    System.out.println(szFileList[i]);
                 }
 
                 szOutFileFinal = szOutFolder + File.separatorChar + (new File(szOrgFileName).getName());

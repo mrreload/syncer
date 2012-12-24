@@ -45,14 +45,20 @@ public class Operator {
     static ArrayList<String[]> alREQ;
     static String sep = ",,";
     static Map<String, String> Resuming;
+    static Map<String, String> RequestLOG;
 
     Operator() {
         opLOG.info("Starting Operator Queues and initializing Maps");
         Q = new LinkedBlockingQueue<>(100);
         FinishedFilesQ = new LinkedBlockingQueue<>();
+        // Clients is name = UID
         Clients = Collections.synchronizedMap(new HashMap<String, String>());
+        // Inprocess is name = ListFile 
         Inprocess = Collections.synchronizedMap(new HashMap<String, String>());
+        // Resuming is UID = file
         Resuming = Collections.synchronizedMap(new HashMap<String, String>());
+        // RequestLOG  is UID = logfile
+        RequestLOG = Collections.synchronizedMap(new HashMap<String, String>());
         XbmcREQSent = Collections.synchronizedMap(new HashMap<String, String>());
         szREQlogfolderXBMC = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc" + File.separatorChar;
         szREQlogfolderFILE = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "file" + File.separatorChar;
@@ -125,20 +131,22 @@ public class Operator {
     static void worker(String client) {
         // look for unfinished work for connected node(s) and request remaining files
         String cliFile = szREQlogfolderXBMC + Clients.get(client) + ".txt";
+        RequestLOG.put(Clients.get(client), cliFile);
         opLOG.fine("Looking for xbmc list at: " + cliFile + " " + new File(cliFile).exists());
         // checking for Files we need to resume first
-        opLOG.info("Checking if there are files to resume");
+        opLOG.fine("Checking if there are files to resume");
         Resumer(Clients.get(client));
-        opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
-        if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
+        opLOG.fine("Resumer info: " + Resuming.get(Clients.get(client)));
+        if (new File(cliFile).exists() && !Inprocess.containsKey(client) && !Resuming.containsKey(Clients.get(client))) {
 
             opLOG.info("Starting new sorter because it's not already being processed for " + client);
             //read file and send requests
-//            xbmcHandler.ReadFile(cliFile, Clients.get(client));
+            xbmcHandler.ReadFile(cliFile, Clients.get(client));
             //let system know file is being processed
-            Inprocess.put(client, "true");
-//            InitSort(cliFile, client, "xbmc");
-        } else {
+            InitSort(cliFile, client, "xbmc");
+            Inprocess.put(client, cliFile);
+            
+        } else if (!Resuming.containsKey(Clients.get(client)) && !XbmcREQSent.containsKey(client)) {
             //otherwise request new list and sync
             opLOG.info("Requesting new XBMC list");
             Sender.putmQ(Clients.get(client), "REQXLST,," + Config.readProp("local.name", Config.cfgFile));
@@ -183,7 +191,7 @@ public class Operator {
         for (int i = 0; i < strInfo.length; i++) {
             System.out.println(strInfo[i]);
         }
-System.exit(99);
+
         String szOutFolder = Config.readProp("local.archive.point", Config.cfgFile) + File.separatorChar + szType + File.separatorChar + szClient + File.separatorChar;
         if (szType.equalsIgnoreCase("xbmc")) {
             szOutFolder = szOutFolder + "\'" + mTitle + "\' (" + mYear + ")";
