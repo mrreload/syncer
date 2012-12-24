@@ -27,7 +27,7 @@ public class Master {
     public final static Logger masterLOG = Logger.getLogger(Syncer.class.getName());
     
     static void Listen(int iPort) throws IOException {
-        System.out.println("Starting Master: on " + iPort);
+        masterLOG.info("Starting Master: on " + iPort);
         if (Config.readProp("My.Uid", Config.cfgFile).equals("")) {            
             Node.myUid = UUID.randomUUID().toString();
             Config.writeProp("My.Uid", Node.myUid, Config.cfgFile);
@@ -38,7 +38,7 @@ public class Master {
         Boolean listening = true;
         
         while (listening) {
-            System.out.println("Waiting for Clients to Connect...");
+            masterLOG.info("Waiting for Clients to Connect...");
             clientSock = serverSock.accept();
             new ConnectionHandler(clientSock).start();
         }
@@ -48,7 +48,7 @@ public class Master {
         InputStream sin = null;
         String uid = null;
         try {
-            System.out.println("New Connection detected ");
+//            System.out.println("New Connection detected ");
             masterLOG.info("Connected to Server: " + conn.toString());
             sin = conn.getInputStream();
             DataInputStream clientData = new DataInputStream(sin);

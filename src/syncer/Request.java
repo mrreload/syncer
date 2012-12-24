@@ -117,7 +117,7 @@ public class Request {
                 }
             }
         }).start();
-        System.out.println("Buffer Limiter started....");
+        
         reqLOG.info("Buffer Limiter started....");
     }
 }

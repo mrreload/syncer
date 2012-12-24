@@ -30,7 +30,7 @@ public class MsgParser {
 //            }
             if (szMSG[2].equals("ACK")) {
                 ConnectionHandler.uid = szMSG[0];
-                System.out.println("Received an ACK from " + szMSG[0] + " " + szMSG[3]);
+//                System.out.println("Received an ACK from " + szMSG[0] + " " + szMSG[3]);
                 msgLOG.info("Received an ACK from " + szMSG[0] + " " + szMSG[3]);
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
                 Operator.Clients.put(szMSG[3], szMSG[0]);
@@ -39,14 +39,14 @@ public class MsgParser {
 
             if (szMSG[2].equals("READY")) {
 //                ConnectionHandler.rStatus.put(UID, "READY");
-                System.out.println("READY Message received from Remote " + szMSG[3] + " " + szMSG[0]);
+//                System.out.println("READY Message received from Remote " + szMSG[3] + " " + szMSG[0]);
                 msgLOG.info("READY Message received from Remote " + szMSG[3] + " " + szMSG[0]);
                 Config.writeProp(szMSG[3], UID, Config.cfgFile);
                 Operator.Clients.put(szMSG[3], szMSG[0]);
             }
 
             if (szMSG[2].equals("COMPLETE")) {
-                System.out.println("COMPLETE Message received from Client " + szMSG[0]);
+                msgLOG.info("COMPLETE Message received from Client " + szMSG[0]);
                 for (int i = 0; i < szMSG.length; i++) {
                 }
 //                System.out.println("Deleting: " + Config.readProp("sender.tmp", Config.cfgFile) + File.separatorChar + szMSG[3]);
@@ -56,7 +56,7 @@ public class MsgParser {
             }
 
             if (szMSG[2].equals("WAIT")) {
-                System.out.println("Received an WAIT, Remote Server is busy Sending already " + szMSG[0]);
+                msgLOG.warning("Received an WAIT, Remote Server is busy Sending already " + szMSG[0]);
             }
 
             if (szMSG[2].equals("REQ")) {
@@ -79,7 +79,7 @@ public class MsgParser {
                 Receiver.rcvFile2(szMSG, UID);
             }
             if (szMSG[2].equals("LST")) {
-                System.out.println("Received a LST " + szMSG[0]);
+                msgLOG.info("Received a LST " + szMSG[0]);
                 for (int i = 0; i < szMSG.length; i++) {
 //            System.out.println(szMSG[i]);
                 }
@@ -114,7 +114,7 @@ public class MsgParser {
             }
 
         } else if (szMSG.length == 1) {
-            System.out.println("Warning Message is 1 object --ignoring" + szMSG[0]);
+//            System.out.println("Warning Message is 1 object --ignoring" + szMSG[0]);
             msgLOG.warning("Message is 1 object " + szMSG[0]);
 
         }

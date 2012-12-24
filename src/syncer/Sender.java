@@ -34,7 +34,7 @@ public class Sender {
         FileInputStream fis = null;
         try {
 
-            System.out.println("Sending file " + szFile + " to " + szUUID);
+            sndLOG.info("Sending: " + szOrgFile + " to " + szUUID + "Chunk#" + iCurrentFile + " Of#" + iTotalFile);
             Socket sock = ConnectionHandler.sockets.get(szUUID);
             File myFile = new File(szFile);
             String szSHA = Hasher.getSHA(szFile);

@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -130,15 +129,15 @@ public class Operator {
         // checking for Files we need to resume first
         opLOG.info("Checking if there are files to resume");
         Resumer(Clients.get(client));
-opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
+        opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
         if (new File(cliFile).exists() && !Inprocess.containsKey(client)) {
 
             opLOG.info("Starting new sorter because it's not already being processed for " + client);
             //read file and send requests
-            xbmcHandler.ReadFile(cliFile, Clients.get(client));
+//            xbmcHandler.ReadFile(cliFile, Clients.get(client));
             //let system know file is being processed
             Inprocess.put(client, "true");
-            InitSort(cliFile, client, "xbmc");
+//            InitSort(cliFile, client, "xbmc");
         } else {
             //otherwise request new list and sync
             opLOG.info("Requesting new XBMC list");
@@ -167,7 +166,7 @@ opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
                 }
             }
         }).start();
-        System.out.println("Complete files Q started....");
+
         opLOG.info("Complete files Q started....");
     }
 
@@ -181,7 +180,10 @@ opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
         String mImDb = strInfo[3];
         String mQual = strInfo[5];
         String szOutFile = null;
-
+        for (int i = 0; i < strInfo.length; i++) {
+            System.out.println(strInfo[i]);
+        }
+System.exit(99);
         String szOutFolder = Config.readProp("local.archive.point", Config.cfgFile) + File.separatorChar + szType + File.separatorChar + szClient + File.separatorChar;
         if (szType.equalsIgnoreCase("xbmc")) {
             szOutFolder = szOutFolder + "\'" + mTitle + "\' (" + mYear + ")";
@@ -190,7 +192,7 @@ opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
             }
             szOutFile = szOutFolder + File.separatorChar + (new File(mPath).getName());
         } else if (szType.equalsIgnoreCase("file")) {
-            System.out.println("File Sync not implemented...yet");
+            opLOG.warning("File Sync not implemented...yet");
             //szOutFile = szOutFolder + szFile;
         }
         opLOG.info("Moving: " + szFile + " to: " + szOutFile);
@@ -225,7 +227,7 @@ opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
             in.close();
 
         } catch (Exception e) {//Catch exception if any
-            System.err.println("Error: " + e.getMessage());
+            opLOG.severe("Error: " + e.getMessage());
         }
         return szMatch;
     }
@@ -268,7 +270,7 @@ opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
             }
             File[] files = file.listFiles();
             for (int fileInList = 0; fileInList < files.length; fileInList++) {
-                System.out.println(files[fileInList].toString());
+//                System.out.println(files[fileInList].toString());
                 ReadLastLine(files[fileInList].toString(), clientUID);
             }
         }
@@ -289,13 +291,13 @@ opLOG.warning("Resumer info: " + Resuming.get(Clients.get(client)));
                 strLine = tmp;
             }
             String lastLine = strLine;
-            System.out.println(lastLine);
+//            System.out.println(lastLine);
             in.close();
             lineArray = lastLine.split(sep);
 
             Sender.putmQ(szUID, "REQ" + sep + lineArray[7] + sep + lineArray[4]);
             for (int i = 0; i < lineArray.length; i++) {
-                opLOG.severe("Last line: " + lineArray[i]);
+                opLOG.fine("Last line: " + lineArray[i]);
             }
             Resuming.put(szUID, lineArray[7]);
 

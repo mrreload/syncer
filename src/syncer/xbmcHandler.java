@@ -136,8 +136,8 @@ public class xbmcHandler {
 //                System.out.println(strLine);
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3])) {
-                    System.out.println("Not in local db " + lineArray[3]);
-                    xbmcLOG.info("Not in local db " + lineArray[3]);
+//                    System.out.println("Not in local db " + lineArray[3]);
+                    xbmcLOG.fine("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
@@ -152,7 +152,7 @@ public class xbmcHandler {
             //Close the input stream
             in.close();
             xbmcLOG.info("Done Reading and querying");
-            System.out.println("Done Reading and querying");
+//            System.out.println("Done Reading and querying");
         } catch (Exception e) {//Catch exception if any
             xbmcLOG.severe(e.getMessage());
         }
@@ -214,7 +214,7 @@ public class xbmcHandler {
 //                System.out.println(strLine);
                 lineArray = strLine.split("\t");
                 if (!queryimdb(lineArray[3]) && (!Operator.Resuming.get(szUID).equalsIgnoreCase(lineArray[4])) ) {
-                    xbmcLOG.info("Not in local db " + lineArray[3]);
+                    xbmcLOG.fine("Not in local db " + lineArray[3]);
 //                    System.out.println("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
@@ -226,7 +226,7 @@ public class xbmcHandler {
             }
             //Close the input stream
             in.close();
-            System.out.println("Done Reading and querying");
+            xbmcLOG.fine("Done Reading and querying");
         } catch (Exception e) {//Catch exception if any
             xbmcLOG.severe(e.getMessage());
         }
@@ -239,7 +239,7 @@ public class xbmcHandler {
             File inFile = new File(file);
 
             if (!inFile.isFile()) {
-                System.out.println("Parameter is not an existing file");
+                xbmcLOG.warning("Parameter is not an existing file");
                 xbmcLOG.warning(file + " Does not exist");
                 return;
             }
@@ -267,13 +267,13 @@ public class xbmcHandler {
 
             //Delete the original file
             if (!inFile.delete()) {
-                System.out.println("Could not delete file");
+                xbmcLOG.warning("Could not delete file " + inFile);
                 return;
             }
 
             //Rename the new file to the filename the original file had.
             if (!tempFile.renameTo(inFile)) {
-                System.out.println("Could not rename file");
+                xbmcLOG.warning("Could not rename " + tempFile + " to " + inFile);
             }
 
         } catch (FileNotFoundException ex) {

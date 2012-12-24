@@ -10,6 +10,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -29,10 +32,11 @@ public class Receiver {
     public final static Logger rcvLOG = Logger.getLogger(Receiver.class.getName());
     static String[] badList;
     static boolean blGotAllChunks;
+    static String szFileOutPath;
 
     public static void rcvFile2(String[] szFileInfo, String UID) {
 
-        System.out.println(szFileInfo.length);
+        rcvLOG.fine("Received File message length " + szFileInfo.length);
         int bytesRead;
         String szOrgFileName = null;
 //        boolean blReceive = true;
@@ -51,18 +55,19 @@ public class Receiver {
             String fileName = szFileInfo[2];
             String szSHA = szFileInfo[3];
             int index = Integer.parseInt(szFileInfo[4]);
-            iCurrentChunk = index + 1;
+            iCurrentChunk = index;
             iTotalChunk = Integer.parseInt(szFileInfo[5]);
             szSHAFull = szFileInfo[6];
             szOrgFileName = szFileInfo[7];
-            String szFileOutPath = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull;
+            alFiles.ensureCapacity(iTotalChunk);
+            szFileOutPath = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull;
             if (!new File(szFileOutPath).exists()) {
                 new File(szFileOutPath).mkdirs();
             }
             String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
             OutputStream output = new FileOutputStream(szCurrentChunk);
             long size = clientData.readLong();
-            rcvLOG.info("Receiving: " + szCurrentChunk + " Size: " + size + " Chunk#: " + iCurrentChunk + " of " + iTotalChunk);
+            rcvLOG.info("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + index + " of " + iTotalChunk);
 //            System.out.println("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk + " of " + iTotalChunk);
             byte[] buffer = new byte[1024];
             while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
@@ -81,11 +86,11 @@ public class Receiver {
                 String transLog = transLogFolder + File.separatorChar + szSHAFull + ".txt";
                 String sz2Write = (szFileInfo[0] + sep + szFileInfo[1] + sep + szFileInfo[2] + sep + szFileInfo[3] + sep + szFileInfo[4] + sep + szFileInfo[5] + sep + szFileInfo[6] + sep + szFileInfo[7]);
                 Operator.csvWrite(sz2Write, transLog);
-                alFiles.add(index, new File(szCurrentChunk));
+                alFiles.add(new File(szCurrentChunk));
 
             } else {
                 //add logic to re-send corrupt chunk
-                System.out.println("Chunk is BAD!");
+
                 rcvLOG.warning("Chunk is BAD!");
                 badFiles.ensureCapacity(index);
                 badFiles.add(szFileInfo);
@@ -98,13 +103,13 @@ public class Receiver {
         }
 //        }
 
-        if (checkAndAssemble(UID, szOrgFileName)) {
+        if (checkAndAssemble(UID, szOrgFileName, szSHAFull)) {
             Sender.putmQ(UID, "COMPLETE" + sep + szSHAFull);
             CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
         } else if (!blGotAllChunks) {
             //Do nothing just wait for rest of chunks. loop
         } else {
-            System.out.println("Failed to assemble: " + szOrgFileName);
+
             rcvLOG.severe("Failed to assemble: " + szOrgFileName);
         }
 
@@ -125,7 +130,7 @@ public class Receiver {
         return blCheck;
     }
 
-    static boolean checkAndAssemble(String UID, String szOrgFileName) {
+    static boolean checkAndAssemble(String UID, String szOrgFileName, String fullHash) {
         boolean blComplete = false;
         blGotAllChunks = false;
         if (badFiles != null) {
@@ -146,6 +151,13 @@ public class Receiver {
             String szOutFileFinal = null;
             File[] szFileList = null;
             try {
+                if (alFiles.size() != (iTotalChunk - 1)) {
+                    alFiles.clear();
+                    File file = new File(szFileOutPath);
+                    File[] files = file.listFiles();
+                    alFiles.addAll(Arrays.asList(files));
+                }
+                Collections.sort(alFiles);
                 szFileList = (File[]) alFiles.toArray(new File[0]);
                 alFiles.clear();
 
@@ -161,9 +173,9 @@ public class Receiver {
             } catch (Exception ex) {
                 rcvLOG.severe(ex.getMessage());
             }
-            if (szSHAFull.equals(Hasher.getSHA(szOutFileFinal))) {
+            if (fullHash.equals(Hasher.getSHA(szOutFileFinal))) {
                 try {
-                    System.out.println("CheckSums match");
+
                     rcvLOG.info("CheckSums match, file good: " + szOutFileFinal);
                     Operator.FinishedFilesQ.put(szOutFileFinal);
                     blComplete = true;
@@ -177,8 +189,8 @@ public class Receiver {
 
 
             } else {
-                System.out.println(szSHAFull);
-                System.out.println(Hasher.getSHA(szOutFileFinal));
+
+                rcvLOG.warning("Bad Hash for: " + szOutFileFinal + " Hash= " + Hasher.getSHA(szOutFileFinal));
                 blGotAllChunks = false;
             }
 
@@ -188,7 +200,7 @@ public class Receiver {
 
     public static String rcvXLST(String[] szFileInfo, String UID, String szFilePath) {
 
-        System.out.println("Receiving XLST length: " + szFileInfo.length);
+
         rcvLOG.info("Receiving XLST length: " + szFileInfo.length);
         int bytesRead;
         String szFullFilePath = null;
@@ -212,7 +224,7 @@ public class Receiver {
                 szFullFilePath = szFilePath + fileName;
                 OutputStream output = new FileOutputStream(szFullFilePath);
                 long size = clientData.readLong();
-                System.out.println("Receiving: " + szFullFilePath + " Size: " + size + " SHA256: " + szSHA);
+
                 rcvLOG.info("Receiving: " + szFullFilePath + " Size: " + size + " SHA256: " + szSHA);
                 byte[] buffer = new byte[1024];
                 while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
@@ -223,7 +235,7 @@ public class Receiver {
                 output.flush();
                 output.close();
 
-                System.out.println("Done receiving XBMC db export from: " + szFileInfo[1]);
+
                 rcvLOG.info("Done receiving XBMC db export from: " + szFileInfo[1]);
                 blReceive = false;
             } catch (IOException ex) {

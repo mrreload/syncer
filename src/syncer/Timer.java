@@ -6,6 +6,7 @@ package syncer;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,6 +16,7 @@ public class Timer {
 
     public Timer kitchenTimer = null;
     private ArrayList<TimerRange> ALTimer = null;
+    public final static Logger tmrLOG = Logger.getLogger(Timer.class.getName());
 
     public Timer() {
         this.ALTimer = new ArrayList<TimerRange>();
@@ -45,16 +47,16 @@ public class Timer {
         }
 
         String[] szElement = szParam.split(",");
-        System.out.println(szElement[0] + " at " + szElement[1] + " for " + szElement[2] + " hours");
+        tmrLOG.info(szElement[0] + " at " + szElement[1] + " for " + szElement[2] + " hours");
 
         if (szElement.length != 3) {
-            System.out.println("Error: incorrect number of parameters for TimerRange.");
+            tmrLOG.severe("Error: incorrect number of parameters for TimerRange.");
             System.exit(-1);
         } else {
             String szDOW = szElement[0].trim();
             String[] szStartTimeElement = szElement[1].split(":");
             if (szStartTimeElement.length != 2) {
-                System.out.println("Error: invalid format for start time \"" + szElement[1] + "\".");
+                tmrLOG.severe("Error: invalid format for start time \"" + szElement[1] + "\".");
                 System.exit(-1);
             }
             int iStartTimeHour = Integer.parseInt(szStartTimeElement[0].trim());
@@ -62,7 +64,7 @@ public class Timer {
 
             String[] szRunTimeElement = szElement[2].split(":");
             if (szRunTimeElement.length != 2) {
-                System.out.println("Error: invalid format for run time \"" + szElement[1] + "\".");
+                tmrLOG.severe("Error: invalid format for run time \"" + szElement[1] + "\".");
                 System.exit(-1);
             }
             int iRunTimeHours = Integer.parseInt(szRunTimeElement[0].trim());
@@ -90,7 +92,7 @@ public class Timer {
         String THU = Config.readProp("Thu.time", Config.cfgFile) + "," + Config.readProp("Thu.length", Config.cfgFile);
         String FRI = Config.readProp("Fri.time", Config.cfgFile) + "," + Config.readProp("Fri.length", Config.cfgFile);
         String SAT = Config.readProp("Sat.time", Config.cfgFile) + "," + Config.readProp("Sat.length", Config.cfgFile);
-        System.out.println("Scheduler set to:");
+        tmrLOG.info("Scheduler set to:");
         setTimer("SUNDAY," + SUN);
         setTimer("MONDAY," + MON);
         setTimer("TUESDAY," + TUE);
@@ -103,7 +105,7 @@ public class Timer {
     public void checkTimers() {
         if (!kitchenTimer.inRange()) {
 //            qpsLOG.info("Encoder not scheduled to run yet");
-            System.out.println("Syncer is sleeping");
+            tmrLOG.info("Syncer is sleeping");
         }
         while (!kitchenTimer.inRange()) {
 //            System.err.println("It is time to encode: " + kitchenTimer.inRange());            

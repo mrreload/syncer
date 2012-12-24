@@ -53,12 +53,13 @@ public class SplitMan {
                     splitLOG.fine("Testing count against chunk#" + String.valueOf(count <= Integer.parseInt(szStartChunk)) + szStartChunk);
                     if (count >= Integer.parseInt(szStartChunk)) {
                         splitLOG.fine("Adding " + count + " " + szOutFile + " to Outgoing Files list");
-                        alFiles.add(count, szOutFile);
+                        alFiles.add(szOutFile);
                     }
 
                     ++count;
 
                 }
+                Collections.sort(alFiles);
                 szFileList = (String[]) alFiles.toArray(new String[0]);
 
             } catch (FileNotFoundException ex) {
@@ -141,10 +142,10 @@ public class SplitMan {
 //            System.out.println(files[fileInList].toString());
 
 //            szFiles[fileInList] = files[fileInList].toString();
-list.add(files[fileInList].toString());
+            list.add(files[fileInList].toString());
 
         }
-        
+
 //        if (iChunk != 0) {
 //            for (int i = 0; i < iChunk; i++) {
 //                String str = String.format("%9s", Integer.toString(i)).replace(" ", "0");
@@ -158,10 +159,10 @@ list.add(files[fileInList].toString());
 
 //        String[] szArray = Arrays.asList(files).toArray(new String[files.length]);
         Collections.sort(list);
-        
+
         szCutList = list.toArray(new String[0]);
         java.util.Arrays.sort(szCutList);
-        
+
         return szCutList;
     }
 

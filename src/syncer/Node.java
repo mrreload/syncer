@@ -48,7 +48,7 @@ public class Node {
             } else {
                 try {
                     nodeLocalSocket.connect(endPoint, 10000);
-                    System.out.println("Success Connected: " + endPoint);
+//                    System.out.println("Success Connected: " + endPoint);
                     nodeLOG.info("Success Connected: " + endPoint);
                     blMasterAlive = true;
 
@@ -78,7 +78,7 @@ public class Node {
         InputStream sin = null;
         String uid = null;
         try {
-            System.out.println("New Connection detected ");
+//            System.out.println("New Connection detected ");
             nodeLOG.info("New Connection detected ");
             sin = conn.getInputStream();
             DataInputStream clientData = new DataInputStream(sin);

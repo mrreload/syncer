@@ -5,6 +5,7 @@
 
 package syncer;
 import java.util.Calendar;
+import java.util.logging.Logger;
 
 /**
  *
@@ -26,6 +27,7 @@ public class TimerRange {
 
     public long lStartTime = -1;
     public long lRunTime = -1;
+    public final static Logger tmrRLOG = Logger.getLogger(TimerRange.class.getName());
 
     private int parseDayOfWeek( String szDOW ){
         int iReturn = -1;
@@ -54,7 +56,7 @@ public class TimerRange {
                 iReturn = 6;
                 break;
             default:
-                System.out.println("Error: \"" + szDOW + "\" not recognized as a day of the week.");
+                tmrRLOG.severe("Error: \"" + szDOW + "\" not recognized as a day of the week.");
                 System.exit(-1);
                 break;
         }
@@ -101,7 +103,7 @@ public class TimerRange {
                 iReturnDayOfWeek = TimerRange.DOW_SATURDAY;
                 break;
             default:
-                System.out.println("Undefined Calendar Day!");
+                tmrRLOG.severe("Undefined Calendar Day!");
                 System.exit(-1);
                 break;
         }

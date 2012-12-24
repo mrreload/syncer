@@ -76,8 +76,8 @@ public class LogMan {
         } catch (NullPointerException ne) {
             logger.setLevel(Level.INFO);
         }
-        System.out.println(Config.readProp("log.level", Config.cfgFile));
-        System.out.println("Log Level set to: " + logger.getLevel());
+//        System.out.println(Config.readProp("log.level", Config.cfgFile));
+//        System.out.println("Log Level set to: " + logger.getLevel());
 
     }
     public static void setupJobLog(String szLogFile) throws IOException {

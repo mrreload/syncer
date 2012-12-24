@@ -43,7 +43,7 @@ public class Syncer {
         if (Config.readProp("server.mode", Config.cfgFile).equalsIgnoreCase("master")) {
 
             try {
-                mainLOG.info("Starting Master " + Config.readProp("local.port", Config.cfgFile));
+                mainLOG.fine("Starting Master " + Config.readProp("local.port", Config.cfgFile));
                 Master.Listen(Integer.parseInt(Config.readProp("local.port", Config.cfgFile)));
 //                TimeUnit.SECONDS.sleep(1);
 

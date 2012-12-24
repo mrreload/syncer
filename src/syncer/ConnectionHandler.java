@@ -48,6 +48,7 @@ public class ConnectionHandler extends Thread {
         }//try
         catch (Exception e) {
             chLOG.severe(e.getMessage());
+            e.printStackTrace();
         }
     }
 }//class connedtion
