@@ -49,7 +49,7 @@ public class Receiver {
 //        while (blReceive) {
 //            InputStream in = null;
         try {
-            Sender.RemoteCanReceive = false;
+            
 
             DataInputStream clientData = new DataInputStream(ConnectionHandler.inStreams.get(UID));
             String fileName = szFileInfo[2];
@@ -67,7 +67,9 @@ public class Receiver {
             String szCurrentChunk = szFileOutPath + File.separatorChar + fileName;
             OutputStream output = new FileOutputStream(szCurrentChunk);
             long size = clientData.readLong();
-            rcvLOG.info("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + index + " of " + iTotalChunk);
+            int percent = Hasher.getPercent(iCurrentChunk, iTotalChunk);
+            rcvLOG.info("Receiving: " + new File(szOrgFileName).getName() + " Chunk#: " + index + " of " + iTotalChunk + " " + percent + "%");
+            
 //            System.out.println("Receiving: " + szOrgFileName + " Size: " + size + " Chunk#: " + iCurrentChunk + " of " + iTotalChunk);
             byte[] buffer = new byte[1024];
             while (size > 0 && (bytesRead = clientData.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
@@ -104,19 +106,18 @@ public class Receiver {
 //        }
 
         if (checkAndAssemble(UID, szOrgFileName, szSHAFull)) {
-            
+
             Sender.putmQ(UID, "COMPLETE" + sep + szSHAFull);
             // check if File was requested from resumer or normal, Remove Map entries and File
             if (Operator.Resuming.get(UID) != null) {
                 Operator.Resuming.remove(UID);
-                //remove from ReqLog
-                xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
+//                //remove from ReqLog
+//                xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
             }
-            if (Operator.Inprocess.get(szSHAFull) != null) {
-                Operator.Inprocess.remove(szSHAFull);
-                //remove from ReqLog
-                xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
-            }
+
+            //remove from ReqLog
+            xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
+
             CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);
         } else if (!blGotAllChunks) {
             //Do nothing just wait for rest of chunks. loop
@@ -154,10 +155,10 @@ public class Receiver {
                 System.out.println(badFiles.get(i));
             }
         }
-rcvLOG.info(szOrgFileName + " Not done yet ");
+//        rcvLOG.info(szOrgFileName + " Not done yet ");
         if ((iCurrentChunk == iTotalChunk) && iTotalChunk != 0 && iCurrentChunk > 0) {
             blGotAllChunks = true;
-rcvLOG.info("Assembling " + szOrgFileName);
+            rcvLOG.info("Assembling " + szOrgFileName);
 
 
             String szOutFileFinal = null;
@@ -177,10 +178,10 @@ rcvLOG.info("Assembling " + szOrgFileName);
                 if (!new File(szOutFolder).exists()) {
                     new File(szOutFolder).mkdirs();
                 }
-                System.out.println("Files to assemble");
-                for (int i = 0; i < szFileList.length; i++) {
-                    System.out.println(szFileList[i]);
-                }
+//                System.out.println("Files to assemble");
+//                for (int i = 0; i < szFileList.length; i++) {
+//                    System.out.println(szFileList[i]);
+//                }
 
                 szOutFileFinal = szOutFolder + File.separatorChar + (new File(szOrgFileName).getName());
                 rcvLOG.info("Assembling: " + szOutFileFinal);
@@ -190,20 +191,12 @@ rcvLOG.info("Assembling " + szOrgFileName);
                 rcvLOG.severe(ex.getMessage());
             }
             if (fullHash.equals(Hasher.getSHA(szOutFileFinal))) {
-                try {
 
-                    rcvLOG.info("CheckSums match, file good: " + szOutFileFinal);
-                    Operator.FinishedFilesQ.put(szOutFileFinal);
-                    blComplete = true;
+                rcvLOG.info("CheckSums match, file good: " + szOutFileFinal);
+                Operator.putFinishedQ(szOutFileFinal);
+                blComplete = true;
 
-                    szFileList = null;
-
-
-                } catch (InterruptedException ex) {
-                    rcvLOG.severe(ex.getMessage());
-                }
-
-
+                szFileList = null;
             } else {
 
                 rcvLOG.warning("Bad Hash for: " + szOutFileFinal + " Hash= " + Hasher.getSHA(szOutFileFinal));

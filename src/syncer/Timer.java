@@ -85,13 +85,13 @@ public class Timer {
     }
 
     public void readSetSchedules() {
-        String SUN = Config.readProp("Sun.time", Config.cfgFile) + "," + Config.readProp("Sun.length", Config.cfgFile);
-        String MON = Config.readProp("Mon.time", Config.cfgFile) + "," + Config.readProp("Mon.length", Config.cfgFile);
-        String TUE = Config.readProp("Tue.time", Config.cfgFile) + "," + Config.readProp("Tue.length", Config.cfgFile);
-        String WED = Config.readProp("Wed.time", Config.cfgFile) + "," + Config.readProp("Wed.length", Config.cfgFile);
-        String THU = Config.readProp("Thu.time", Config.cfgFile) + "," + Config.readProp("Thu.length", Config.cfgFile);
-        String FRI = Config.readProp("Fri.time", Config.cfgFile) + "," + Config.readProp("Fri.length", Config.cfgFile);
-        String SAT = Config.readProp("Sat.time", Config.cfgFile) + "," + Config.readProp("Sat.length", Config.cfgFile);
+        String SUN = Config.readProp("Sun.time", Config.tmrCFG) + "," + Config.readProp("Sun.length", Config.tmrCFG);
+        String MON = Config.readProp("Mon.time", Config.tmrCFG) + "," + Config.readProp("Mon.length", Config.tmrCFG);
+        String TUE = Config.readProp("Tue.time", Config.tmrCFG) + "," + Config.readProp("Tue.length", Config.tmrCFG);
+        String WED = Config.readProp("Wed.time", Config.tmrCFG) + "," + Config.readProp("Wed.length", Config.tmrCFG);
+        String THU = Config.readProp("Thu.time", Config.tmrCFG) + "," + Config.readProp("Thu.length", Config.tmrCFG);
+        String FRI = Config.readProp("Fri.time", Config.tmrCFG) + "," + Config.readProp("Fri.length", Config.tmrCFG);
+        String SAT = Config.readProp("Sat.time", Config.tmrCFG) + "," + Config.readProp("Sat.length", Config.tmrCFG);
         tmrLOG.info("Scheduler set to:");
         setTimer("SUNDAY," + SUN);
         setTimer("MONDAY," + MON);

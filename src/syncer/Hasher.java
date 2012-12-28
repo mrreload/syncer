@@ -45,4 +45,7 @@ public final static Logger hsLOG = Logger.getLogger(Hasher.class.getName());
         }
         return sb.toString();
     }
+    public static int getPercent(int subtotal, int total) {
+        return (int) (((float) subtotal / (float) total) * 100);
+    }
 }

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -32,7 +33,7 @@ import java.util.logging.Logger;
 public class Operator {
 
     static BlockingQueue<String> Q;
-    static BlockingQueue<String> FinishedFilesQ;
+    public static BlockingQueue<String> FinishedFilesQ;
     static Map<String, String> Clients;
     static Map<String, String> Inprocess;
     static Map<String, String> XbmcREQSent;
@@ -40,12 +41,12 @@ public class Operator {
     public static String szREQlogfolderXBMC;
     public static String szCliFileListFolder;
     public static String szREQlogfolderFILE;
-    private static StandardCopyOption overWrite = StandardCopyOption.REPLACE_EXISTING;
-    private static StandardCopyOption atomicMove = StandardCopyOption.ATOMIC_MOVE;
+    private static StandardCopyOption overWrite = StandardCopyOption.REPLACE_EXISTING;    
     static ArrayList<String[]> alREQ;
     static String sep = ",,";
     static Map<String, String> Resuming;
     static Map<String, String> RequestLOG;
+    static Map<String, String> FilesRequested;
 
     Operator() {
         opLOG.info("Starting Operator Queues and initializing Maps");
@@ -60,6 +61,7 @@ public class Operator {
         // RequestLOG  is UID = logfile
         RequestLOG = Collections.synchronizedMap(new HashMap<String, String>());
         XbmcREQSent = Collections.synchronizedMap(new HashMap<String, String>());
+        FilesRequested = Collections.synchronizedMap(new HashMap<String, String>());
         szREQlogfolderXBMC = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc" + File.separatorChar;
         szREQlogfolderFILE = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "file" + File.separatorChar;
         szCliFileListFolder = Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + "xbmc-client" + File.separatorChar;
@@ -77,7 +79,7 @@ public class Operator {
 //            String cliFile = szREQlogfolderFILE + Clients.get(client) + ".txt";
             // file sync ops here
         }
-        //System.out.println(Config.readProp("xbmc.sync", Config.cfgFile));
+//        System.out.println(Config.readProp("xbmc.sync", Config.cfgFile));
         if (Config.readProp("xbmc.sync", Config.cfgFile).equalsIgnoreCase("true")) {
 
             // xbmc sync ops here
@@ -91,7 +93,7 @@ public class Operator {
 
 //                    System.out.println("Client: " + client[c] + " is connected: " + ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() + " request sent: " + XbmcREQSent.containsKey(client[c]));
                     if (ConnectionHandler.sockets.get(Clients.get(client[c])) != null) {
-                        if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected() && !XbmcREQSent.containsKey(client[c])) {
+                        if (ConnectionHandler.sockets.get(Clients.get(client[c])).isConnected()) {
 
                             worker(client[c]);
                         } else {
@@ -137,14 +139,23 @@ public class Operator {
         opLOG.fine("Checking if there are files to resume");
         Resumer(Clients.get(client));
         opLOG.fine("Resumer info: " + Resuming.get(Clients.get(client)));
-        if (new File(cliFile).exists() && !Inprocess.containsKey(client) && !Resuming.containsKey(Clients.get(client))) {
+//        int i = 0;
+//        if (new File(cliFile).exists() && i == 0) {
+//            InitSort(cliFile, client, "xbmc");
+//            i = 1;
+//        } else {
+//            
+//        }
+        if (new File(cliFile).exists() && !Inprocess.containsKey(cliFile) && !Resuming.containsKey(Clients.get(client))) {
 
             opLOG.info("Starting new sorter because it's not already being processed for " + client);
             //read file and send requests
             xbmcHandler.ReadFile(cliFile, Clients.get(client));
             //let system know file is being processed
+            Inprocess.put(cliFile, client);
             InitSort(cliFile, client, "xbmc");
-            Inprocess.put(client, cliFile);
+            
+            
             
         } else if (!Resuming.containsKey(Clients.get(client)) && !XbmcREQSent.containsKey(client)) {
             //otherwise request new list and sync
@@ -159,19 +170,20 @@ public class Operator {
         new Thread(new Runnable() {
             public void run() {
 
-                while (true) {
+                while (Inprocess.containsValue(szClient)) {
                     try {
-                        //take file String from Q 
-                        WatchNsort(FinishedFilesQ.take(), szLogOfReq, szClient, szType);
-                    } catch (InterruptedException ex) {
-                        opLOG.severe(ex.getMessage());
-                    }
-                    try {
+                        //take file String from Q
+                        String szFile = FinishedFilesQ.take();
+                        
+                        WatchNsort(szFile, szLogOfReq, szClient, szType);
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                         opLOG.severe(ex.getMessage());
                     }
                 }
+                    
+                    
+                
             }
         }).start();
 
@@ -188,13 +200,13 @@ public class Operator {
         String mImDb = strInfo[3];
         String mQual = strInfo[5];
         String szOutFile = null;
-        for (int i = 0; i < strInfo.length; i++) {
-            System.out.println(strInfo[i]);
-        }
+//        for (int i = 0; i < strInfo.length; i++) {
+//            System.out.println(strInfo[i]);
+//        }
 
         String szOutFolder = Config.readProp("local.archive.point", Config.cfgFile) + File.separatorChar + szType + File.separatorChar + szClient + File.separatorChar;
         if (szType.equalsIgnoreCase("xbmc")) {
-            szOutFolder = szOutFolder + "\'" + mTitle + "\' (" + mYear + ")";
+            szOutFolder = szOutFolder + mTitle + " (" + mYear + ")";
             if (!new File(szOutFolder).exists()) {
                 new File(szOutFolder).mkdirs();
             }
@@ -205,14 +217,16 @@ public class Operator {
         }
         opLOG.info("Moving: " + szFile + " to: " + szOutFile);
         nioMove(szFile, szOutFile);
-        opLOG.info("Removing line: " + szFile + " from: " + szReqLog);
+        opLOG.info("Removing line containing: " + new File(szFile).getName() + " from: " + szReqLog);
         xbmcHandler.removeLineFromFile(szFile, szReqLog);
 
     }
 
     static String[] GetOutPutPath(String szXList, String szSearch) {
+        opLOG.info("Searching for: " + szSearch + " in " + szXList);
         String szMatch[] = new String[6];
         String lineArray[] = new String[6];
+        String szSearchMe = new File(szSearch).getName();
         try {
             // Open the file that is the first 
             // command line parameter
@@ -226,7 +240,7 @@ public class Operator {
                 // Print the content on the console
 //                System.out.println(strLine);
                 lineArray = strLine.split("\t");
-                if (lineArray[4].contains(szSearch)) {
+                if (lineArray[4].contains(szSearchMe)) {
                     szMatch = lineArray;
                 }
 
@@ -249,10 +263,10 @@ public class Operator {
             if (!Files.exists(targetPath)) {
                 Files.createDirectory(targetPath);
             }
-            Files.move(source, destination, overWrite, atomicMove);
+            Files.move(source, destination, overWrite);
             opLOG.info("File Moved to:  " + szdstFile);
         } catch (IOException ex) {
-            opLOG.info(ex.getMessage());
+            opLOG.severe(ex.getMessage());
         }
     }
 
@@ -319,6 +333,15 @@ public class Operator {
             } catch (IOException ex) {
                 opLOG.severe(ex.getMessage());
             }
+        }
+    }
+    public static void putFinishedQ(String szFile) {
+        try {
+            opLOG.info("Putting " + szFile + " in Finished Q");
+            FinishedFilesQ.put(szFile);
+//            System.out.println(FinishedFilesQ.peek() + " is in Finished Q");
+        } catch (InterruptedException ex) {
+            opLOG.severe(ex.getMessage());
         }
     }
 }

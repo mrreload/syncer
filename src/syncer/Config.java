@@ -23,8 +23,9 @@ public class Config {
     private final static Logger CFGLOG = Logger.getLogger(Config.class.getName());
 //    static String cfgFile;
     private static String LogFolder;
-    private static String home;
+     public static String home;
     public static String cfgFile;
+    public static String tmrCFG;
 
     public static String readProp(String prop, String daFile) {
         String propval = null;
@@ -77,8 +78,8 @@ public class Config {
         return szLogLevel;
     }
 
-    public static void setHome() {
-        home = System.getProperty("user.home") + File.separatorChar + ".syncer" + File.separatorChar;
+    public static void setHome(String szHome) {
+        home = szHome;
 
         File hm = new File(home);
         if (!hm.exists()) {
@@ -106,9 +107,11 @@ public class Config {
 
     }
 
-    private static String setCfgFL(String szConfigFolder) {
+    static void setCfgFL(String szConfigFolder) {
         cfgFile = szConfigFolder + "syncer.conf";
+        tmrCFG = szConfigFolder + "timers.conf";
         File cf = new File(cfgFile);
+        File tcf = new File(tmrCFG);
         if (!cf.exists()) {
             CFGLOG.severe("Properties file missing or first run creating file");
             try {
@@ -123,8 +126,23 @@ public class Config {
                 CFGLOG.severe("Error: " + e.getMessage() + " " + e.getClass() + " Cause: " + e.getCause());
             }
         }
-        CFGLOG.info("Properties File at: " + cfgFile + " :INFO Only NOT an Error!");
-        return cfgFile;
+        CFGLOG.info("Config File at: " + cfgFile + " :INFO Only NOT an Error!");
+        if (!tcf.exists()) {
+            CFGLOG.severe("Timers config missing or first run creating file");
+            try {
+                // Create file 
+                FileWriter fstream = new FileWriter(tmrCFG);
+                BufferedWriter out = new BufferedWriter(fstream);
+                out.write("### Syncer Timers File");
+                //Close the output stream
+                out.close();
+            } catch (Exception e) {//Catch exception if any
+                System.err.println("Error: " + e.getMessage());
+                CFGLOG.severe("Error: " + e.getMessage() + " " + e.getClass() + " Cause: " + e.getCause());
+            }
+        }
+        CFGLOG.info("Timers config at: " + tmrCFG + " :INFO Only NOT an Error!");
+        
     }
 
     private static void dSet(String prop, String defVal) {
@@ -139,6 +157,20 @@ public class Config {
         if (readProp(prop, cfgFile).isEmpty()) {
             CFGLOG.warning("Empty Value for: " + prop + " setting default value of: " + readProp(prop, "syncer.conf"));
             writeProp(prop, defVal, cfgFile);
+        }
+    }
+    private static void dSetTimers(String prop, String defVal) {
+
+
+        if (readProp(prop, tmrCFG) == null) {
+
+            CFGLOG.warning(prop + " Property not found in config file setting default value of: " + defVal);
+            writeProp(prop, defVal, tmrCFG);
+        }
+
+        if (readProp(prop, tmrCFG).isEmpty()) {
+            CFGLOG.warning("Empty Value for: " + prop + " setting default value of: " + defVal);
+            writeProp(prop, defVal, tmrCFG);
         }
     }
 
@@ -159,7 +191,7 @@ public class Config {
             }
         }
 
-        dSet("output.folder", System.getProperty("user.home") + File.separatorChar + "Syncer" + File.separatorChar + "SyncTemp");
+        dSet("output.folder", System.getProperty("user.home") + File.separatorChar + "Syncer" + File.separatorChar + "Finsished");
         dSet("sender.tmp", System.getProperty("user.home") + File.separatorChar + "Syncer" + File.separatorChar + "SendTemp");
         dSet("receive.tmp", System.getProperty("user.home") + File.separatorChar + "Syncer" + File.separatorChar + "ReceiveTemp");
         dSet("server.mode", "node");
@@ -176,24 +208,24 @@ public class Config {
         dSet("xbmc-db.pass", "xbmc");
         dSet("xbmc-db.host", "localhost");
         dSet("xbmc-db.port", "3306");
-        dSet("xbmc-db.name", "MyVideos72");
+        dSet("xbmc-db.name", "MyVideos75");
         dSet("sync.partners.xbmc.csv", "none");
         dSet("sync.partners.file.csv", "none");
         dSet("xbmc.sync.use.timer", "true");
-        dSet("Sun.time", "2:00");
-        dSet("Sun.length", "10:00");
-        dSet("Mon.time", "2:00");
-        dSet("Mon.length", "10:00");
-        dSet("Tue.time", "2:00");
-        dSet("Tue.length", "10:00");
-        dSet("Wed.time", "2:00");
-        dSet("Wed.length", "10:00");
-        dSet("Thu.time", "2:00");
-        dSet("Thu.length", "10:00");
-        dSet("Fri.time", "2:00");
-        dSet("Fri.length", "10:00");
-        dSet("Sat.time", "2:00");
-        dSet("Sat.length", "10:00");
+        dSetTimers("Sun.time", "2:00");
+        dSetTimers("Sun.length", "10:00");
+        dSetTimers("Mon.time", "2:00");
+        dSetTimers("Mon.length", "10:00");
+        dSetTimers("Tue.time", "2:00");
+        dSetTimers("Tue.length", "10:00");
+        dSetTimers("Wed.time", "2:00");
+        dSetTimers("Wed.length", "10:00");
+        dSetTimers("Thu.time", "2:00");
+        dSetTimers("Thu.length", "10:00");
+        dSetTimers("Fri.time", "2:00");
+        dSetTimers("Fri.length", "10:00");
+        dSetTimers("Sat.time", "2:00");
+        dSetTimers("Sat.length", "10:00");
         dSet("log.level", "4");
 
     }

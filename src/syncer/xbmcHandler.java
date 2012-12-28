@@ -65,7 +65,7 @@ public class xbmcHandler {
                     + "left    join streamdetails\n"
                     + "as      streamdetails\n"
                     + "on      movie.idfile = streamdetails.idfile\n"
-                    + "where     streamdetails.iVideoWidth is not null;");
+                    + "where     streamdetails.iVideoWidth <= 720 order by idFile desc limit 1;");
 //                    + "where   movie.idMovie = '3980';");
 //            System.out.println(pst);
             rs = pst.executeQuery();
@@ -142,10 +142,10 @@ public class xbmcHandler {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
                     Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,000000000");
-                    
-                   // Log sent requests
+
+                    // Log sent requests
                     csvWrite(strLine, Operator.szREQlogfolderXBMC + szUID + ".txt");
-                    
+
                 }
 
             }
@@ -213,14 +213,18 @@ public class xbmcHandler {
                 // Print the content on the console
 //                System.out.println(strLine);
                 lineArray = strLine.split("\t");
-                if (!queryimdb(lineArray[3]) && (!Operator.Resuming.get(szUID).equalsIgnoreCase(lineArray[4])) ) {
+                if (!queryimdb(lineArray[3]) && (!Operator.Resuming.get(szUID).equalsIgnoreCase(lineArray[4]))) {
                     xbmcLOG.fine("Not in local db " + lineArray[3]);
 //                    System.out.println("Not in local db " + lineArray[3]);
                     if (!new File(Operator.szREQlogfolderXBMC).exists()) {
                         new File(Operator.szREQlogfolderXBMC).mkdirs();
                     }
+                    xbmcLOG.info("Testing if we have already requested: " + lineArray[4] + " from " + szUID);
+                    if (!Operator.FilesRequested.get(lineArray[4]).equals(szUID)) {
+                        Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,000000000");
+                        Operator.FilesRequested.put(lineArray[4], szUID);
+                    }
 
-                    Sender.putmQ(szUID, "REQ,," + lineArray[4] + ",,000000000");
                 }
 
             }
@@ -229,6 +233,7 @@ public class xbmcHandler {
             xbmcLOG.fine("Done Reading and querying");
         } catch (Exception e) {//Catch exception if any
             xbmcLOG.severe(e.getMessage());
+            e.printStackTrace();
         }
     }
 

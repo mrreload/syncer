@@ -4,6 +4,7 @@
  */
 package syncer;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -20,17 +21,25 @@ public class Syncer {
     static String szFile = "/home/xbmc/test/hsqldb-2.2.8.zip";
 //    static String szFile2 = "C:" + File.separatorChar + "temp";
     static String szFile3 = "/home/media/test/test.zip";
+    
 
     public static void main(String[] args) throws IOException, InterruptedException {
+        String home2 = new File(".").getCanonicalPath();
+        
         //Config.cfgFile = "syncer.conf";
 //        WatchDir.Watcher(szFile2);
-        Config.setHome();
-        Config.checkDefaults();
+        
+        
         if (args.length > 0) {
-            Config.cfgFile = args[0];
+            Config.setHome(new File(".").getCanonicalPath() + File.separatorChar);
             //szFile = args[1];
 
+        } else {
+            Config.setHome(System.getProperty("user.home") + File.separatorChar + ".syncer" + File.separatorChar);
         }
+        
+        
+        Config.checkDefaults();
         LogMan.setup();
         //xbmcHandler.query("/home/xbmc/testexport.txt");
         Sender sendQ = new Sender();
