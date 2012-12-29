@@ -218,7 +218,7 @@ public class Operator {
         opLOG.info("Moving: " + szFile + " to: " + szOutFile);
         nioMove(szFile, szOutFile);
         opLOG.info("Removing line containing: " + new File(szFile).getName() + " from: " + szReqLog);
-        xbmcHandler.removeLineFromFile(szFile, szReqLog);
+        xbmcHandler.removeLineFromFile(szReqLog, new File(szFile).getName());
 
     }
 

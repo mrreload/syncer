@@ -116,6 +116,7 @@ public class Receiver {
             }
 
             //remove from ReqLog
+            rcvLOG.info("Removing line containing: " + szSHAFull + " from: " + Operator.RequestLOG.get(UID));
             xbmcHandler.removeLineFromFile(Operator.RequestLOG.get(UID), szSHAFull);
 
             CleanUp.deleteDir(Config.readProp("receive.tmp", Config.cfgFile) + File.separatorChar + szSHAFull);

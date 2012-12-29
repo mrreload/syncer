@@ -238,7 +238,8 @@ public class xbmcHandler {
     }
 
     public static void removeLineFromFile(String file, String lineToRemove) {
-
+        
+        
         try {
 
             File inFile = new File(file);
